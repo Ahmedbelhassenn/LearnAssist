@@ -1,6 +1,5 @@
-<p align="center">
-   <img width="30"  alt="LearnAssistLogo" src="https://github.com/user-attachments/assets/c9d9d7f3-5185-4752-affc-eb72b94c8e96" />LearnAssist
-</p>
+
+<img alt="LearnAssist Logo et Titre" width="400" src="https://github.com/user-attachments/assets/8ea1cd93-a472-4939-97a0-a9747077fd73" />
 
 > **Plateforme LMS Intelligente connectant Formateurs et Apprenants.**
 
