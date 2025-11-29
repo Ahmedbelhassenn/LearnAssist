@@ -12,6 +12,39 @@
 
 ---
 
+## 🏗️ Architecture du Projet
+
+```mermaid
+graph TD
+    User[Utilisateur] -->|HTTPS| Client[Client Angular]
+    
+    subgraph "LearnAssist Monorepo"
+        Client -->|REST API / JWT| Server[Serveur Spring Boot]
+        Server -->|JPA / Hibernate| DB[(PostgreSQL)]
+        Server -->|Spring AI| AI[Service IA]
+    end
+    
+    AI -.->|API Call| OpenAI[OpenAI API]
+```
+
+---
+
+## 🎬 Démo et Aperçu
+
+> *Une image vaut mille mots. Voici un aperçu de l'application.*
+
+| Page d'accueil | Espace Participant |
+|:---:|:---:|
+| ![Home](https://via.placeholder.com/600x350?text=Page+d'Accueil) | ![Participant](https://via.placeholder.com/600x350?text=Tableau+de+Bord+Participant) |
+| *Landing page moderne et accueillante* | *Suivi des cours et progression* |
+
+| Espace Instructeur | ChatBot IA |
+|:---:|:---:|
+| ![Instructor](https://via.placeholder.com/600x350?text=Espace+Instructeur) | ![ChatBot](https://via.placeholder.com/600x350?text=Assistant+IA) |
+| *Gestion des formations et statistiques* | *Assistance intelligente en temps réel* |
+
+---
+
 ## 🚀 Fonctionnalités Principales
 
 ### 👨‍🎓 Espace Participant
@@ -25,11 +58,6 @@
 *   **Gestion des Inscriptions** : Validation et suivi des demandes de participation.
 *   **Tableau de Bord** : Vue d'ensemble de l'activité et des statistiques.
 
-### 🔐 Sécurité & Architecture
-*   **Authentification Robuste** : Système sécurisé basé sur JWT (JSON Web Tokens).
-*   **Rôles & Permissions** : Séparation stricte entre les espaces Instructeur et Participant.
-*   **Architecture Monorepo** : Gestion centralisée du Frontend et du Backend.
-
 ---
 
 ## 🛠️ Stack Technique
@@ -38,12 +66,12 @@
 *   **Framework** : Angular 18
 *   **Styling** : Tailwind CSS
 *   **Icônes** : Lucide Angular
-*   **HTTP Client** : Intercepteurs pour la gestion automatique des tokens JWT.
+*   **Architecture** : Modular Components, Guards, Interceptors.
 
 ### Backend (`/Learn_Assist_Backend`)
 *   **Framework** : Spring Boot 3.4.2
 *   **Base de Données** : PostgreSQL (JPA/Hibernate)
-*   **Sécurité** : Spring Security 6
+*   **Sécurité** : Spring Security 6 (JWT)
 *   **IA** : Spring AI (Intégration OpenAI)
 
 ---
@@ -91,24 +119,6 @@
     ng serve
     \`\`\`
 4.  Accédez à l'application sur `http://localhost:4200`.
-
----
-
-## 📂 Structure du Projet
-
-\`\`\`
-LearnAssist/
-├── Learn_Assist_Backend/        # API Spring Boot
-│   ├── src/main/java/           # Code source Java
-│   └── src/main/resources/      # Configuration & Application Properties
-│
-├── Learn_Assist_Frontend/       # Client Angular
-│   └── LearnAssist/
-│       ├── src/app/             # Composants, Services, Guards
-│       └── tailwind.config.js   # Configuration CSS
-│
-└── README.md                    # Documentation du projet
-\`\`\`
 
 ---
 
