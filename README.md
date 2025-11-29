@@ -35,12 +35,14 @@ graph TD
 
 | Page d'accueil | Espace Participant |
 |:---:|:---:|
-| ![Home](https://via.placeholder.com/600x350?text=Page+d'Accueil) | ![Participant](https://via.placeholder.com/600x350?text=Tableau+de+Bord+Participant) |
+|<img width="974" height="873" alt="Capture d&#39;écran 2025-11-29 105121" src="https://github.com/user-attachments/assets/8057ee02-cd90-4752-9ac0-13573014ada6" />
+  | ![Participant](https://via.placeholder.com/600x350?text=Tableau+de+Bord+Participant) |
 | *Landing page moderne et accueillante* | *Suivi des cours et progression* |
 
 | Espace Instructeur | ChatBot IA |
 |:---:|:---:|
-| ![Instructor](https://via.placeholder.com/600x350?text=Espace+Instructeur) | ![ChatBot](https://via.placeholder.com/600x350?text=Assistant+IA) |
+| <img width="1253" height="907" alt="image" src="https://github.com/user-attachments/assets/cc623792-1e21-4431-817b-64bf7572b409" />
+ | ![ChatBot](https://via.placeholder.com/600x350?text=Assistant+IA) |
 | *Gestion des formations et statistiques* | *Assistance intelligente en temps réel* |
 
 ---
