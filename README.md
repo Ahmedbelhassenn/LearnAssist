@@ -40,7 +40,8 @@ graph TD
 
 | Espace Instructeur | ChatBot IA |
 |:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/cc623792-1e21-4431-817b-64bf7572b409" alt="Espace Instructeur" width="100%"> | <img src="LIEN_A_REMPLACER" alt="ChatBot IA" width="100%"> |
+| <img src="https://github.com/user-attachments/assets/cc623792-1e21-4431-817b-64bf7572b409" alt="Espace Instructeur" width="100%"> | <img width="1917" height="909" alt="Capture d&#39;écran 2025-11-29 105951" src="https://github.com/user-attachments/assets/7b138d21-2fba-4583-a16e-9a970060fe49" />
+ |
 | *Gestion des formations et statistiques* | *Assistance intelligente en temps réel* |
 
 ## 🚀 Fonctionnalités Principales
