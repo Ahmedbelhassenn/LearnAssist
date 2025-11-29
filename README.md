@@ -40,8 +40,13 @@ graph TD
 
 | Espace Instructeur | ChatBot IA |
 |:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/cc623792-1e21-4431-817b-64bf7572b409" alt="Espace Instructeur" width="100%"> | <img width="1917" height="909" alt="Capture d&#39;écran 2025-11-29 105951" src="https://github.com/user-attachments/assets/7b138d21-2fba-4583-a16e-9a970060fe49" />|
+| <img src="https://github.com/user-attachments/assets/cc623792-1e21-4431-817b-64bf7572b409" alt="Espace Instructeur" width="100%"> |<img width="1917" height="909" alt="Capture d&#39;écran 2025-11-29 105951" src="https://github.com/user-attachments/assets/83f8012f-b956-414a-9391-ca8d6fb31a13" />|
 | *Gestion des formations et statistiques* | *Assistance intelligente en temps réel* |
+
+| Demande d'accès (Participant) | Ajout de Formation (Instructeur) |
+|:---:|:---:|
+| <img width="1688" height="900" alt="Capture d&#39;écran 2025-11-29 111222" src="https://github.com/user-attachments/assets/3b8f6d84-c6ca-4d82-8fb0-34f9d8d0f493" />|<img width="1725" height="898" alt="Capture d&#39;écran 2025-11-29 111522" src="https://github.com/user-attachments/assets/89f22836-ee0b-4f2e-a8e7-e6b187416431" />|
+| *Flux de demande d'inscription sécurisé* | *Interface intuitive de création de cours* |
 
 ## 🚀 Fonctionnalités Principales
 
