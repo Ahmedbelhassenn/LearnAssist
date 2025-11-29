@@ -30,45 +30,45 @@ import { InstructorsComponent } from './Components/home-pages/instructors/instru
 import { InstructorsDetailsComponent } from './Components/home-pages/instructors-details/instructors-details.component';
 
 export const routes: Routes = [
-    {path: 'home', component: HomePageComponent},
-    {path: 'instructors-list', component: InstructorsComponent},
-    {path: 'instructors-list/:id', component:InstructorsDetailsComponent},
-    {path: 'participant-registration', component:ParticipantSignupComponent},
-    {path: 'instructor-registration', component:InstructorSignupComponent},
-    {path: 'login',component:ConnexionComponent},
+  { path: 'home', component: HomePageComponent },
+  { path: 'instructors-list', component: InstructorsComponent },
+  { path: 'instructors-list/:id', component: InstructorsDetailsComponent },
+  { path: 'participant-registration', component: ParticipantSignupComponent },
+  { path: 'instructor-registration', component: InstructorSignupComponent },
+  { path: 'login', component: ConnexionComponent },
 
-    {
-        path: 'participant',
-        component: ParticipantLayoutComponent,
-        children: [
-          { path: 'home-page',component:ParticipantHomePageComponent,canActivate: [participantGuard]},
-          { path: 'profile-picture', component:ProfilePictureComponent,canActivate: [participantGuard] },
-          { path: "edit-profile", component:EditParticipantProfileComponent,canActivate:[participantGuard]},
-          { path: 'all-formation', component:ParticipantAllFormationComponent,canActivate:[participantGuard]},
-          { path: 'chat', component:ChatPageComponent,canActivate:[participantGuard]},
-          { path: 'formation-details', component:ParticipantFormationDetailsComponent,canActivate:[participantGuard]},
-          { path: 'course-details/:id', component:ParticipantCourseDetailsComponent,canActivate:[participantGuard]},
-          { path: 'instructors', component:InstructorsListComponent,canActivate:[participantGuard]},          
-          { path: 'instructors/:id', component:InstructorDetailsPageComponent,canActivate:[participantGuard]},          
-        ]
-    },
+  {
+    path: 'participant',
+    component: ParticipantLayoutComponent,
+    children: [
+      { path: 'home-page', component: ParticipantHomePageComponent, canActivate: [participantGuard] },
+      { path: 'profile-picture', component: ProfilePictureComponent, canActivate: [participantGuard] },
+      { path: "edit-profile", component: EditParticipantProfileComponent, canActivate: [participantGuard] },
+      { path: 'all-formation', component: ParticipantAllFormationComponent, canActivate: [participantGuard] },
+      { path: 'chat', component: ChatPageComponent, canActivate: [participantGuard] },
+      { path: 'formation-details/:id', component: ParticipantFormationDetailsComponent, canActivate: [participantGuard] },
+      { path: 'course-details/:id', component: ParticipantCourseDetailsComponent, canActivate: [participantGuard] },
+      { path: 'instructors', component: InstructorsListComponent, canActivate: [participantGuard] },
+      { path: 'instructors/:id', component: InstructorDetailsPageComponent, canActivate: [participantGuard] },
+    ]
+  },
 
-    {
-        path : 'instructor', component : InstructorLayoutComponent, 
-        children: [
-          {path: 'formation-details', component:InstructorFormationDetailsComponent,canActivate:[instructorGuard]},
-          {path: 'all-formation', component:AllFormationsComponent,canActivate:[instructorGuard]},
-          {path: 'course-details/:id', component:InstructorCourseDetailsComponent,canActivate:[instructorGuard]},
-          {path: 'profile-picture', component:InstructorEditProfilePictureComponent,canActivate: [instructorGuard] },
-          {path: 'edit-profile', component:EditInstructorProfileComponent,canActivate: [instructorGuard] },
-          {path: 'home-page', component:InstructorHomePageComponent,canActivate: [instructorGuard] },
-          {path: 'add-formation', component:AddFormationComponent,canActivate: [instructorGuard] },
-          {path: 'add-courses', component:AddCoursesComponent,canActivate: [instructorGuard] },
-          {path: 'requests', component:ApprovalRequestsComponent,canActivate: [instructorGuard] },
-          {path: 'articles', component:InstructorArticlesComponent,canActivate: [instructorGuard] },
+  {
+    path: 'instructor', component: InstructorLayoutComponent,
+    children: [
+      { path: 'formation-details', component: InstructorFormationDetailsComponent, canActivate: [instructorGuard] },
+      { path: 'all-formation', component: AllFormationsComponent, canActivate: [instructorGuard] },
+      { path: 'course-details/:id', component: InstructorCourseDetailsComponent, canActivate: [instructorGuard] },
+      { path: 'profile-picture', component: InstructorEditProfilePictureComponent, canActivate: [instructorGuard] },
+      { path: 'edit-profile', component: EditInstructorProfileComponent, canActivate: [instructorGuard] },
+      { path: 'home-page', component: InstructorHomePageComponent, canActivate: [instructorGuard] },
+      { path: 'add-formation', component: AddFormationComponent, canActivate: [instructorGuard] },
+      { path: 'add-courses', component: AddCoursesComponent, canActivate: [instructorGuard] },
+      { path: 'requests', component: ApprovalRequestsComponent, canActivate: [instructorGuard] },
+      { path: 'articles', component: InstructorArticlesComponent, canActivate: [instructorGuard] },
 
-        ]
+    ]
 
-    },
-    {path: '', redirectTo: 'home' , pathMatch: 'full'}
+  },
+  { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
