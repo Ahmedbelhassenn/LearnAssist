@@ -1,5 +1,5 @@
 <p align="center">
-   # <img width="245" height="238" alt="LearnAssistLogo" src="https://github.com/user-attachments/assets/c9d9d7f3-5185-4752-affc-eb72b94c8e96" />LearnAssist
+   <img width="30"  alt="LearnAssistLogo" src="https://github.com/user-attachments/assets/c9d9d7f3-5185-4752-affc-eb72b94c8e96" />LearnAssist
 </p>
 
 > **Plateforme LMS Intelligente connectant Formateurs et Apprenants.**
