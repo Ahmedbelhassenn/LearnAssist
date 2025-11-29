@@ -1,0 +1,145 @@
+<app-navbar></app-navbar>
+<div class="bg-gray-50 min-h-screen">
+  <!-- Section Profil Instructeur -->
+  <section class="py-16 bg-white">
+    <div class="container mx-auto px-6">
+      <div class="flex flex-col md:flex-row gap-12 items-center">
+        <!-- Photo de profil -->
+        <div class="w-full md:w-1/4 flex justify-center">
+          <div class="relative">
+            <img [src]="instructor.displayPhotoUrl" 
+                 [alt]="instructor.firstName + ' ' + instructor.lastName"
+                 class="w-64 h-64 rounded-full object-cover shadow-lg">
+            <div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+              <div style="text-align: center;">
+                {{ instructor.speciality }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Détails -->
+        <div class="w-full md:w-3/4">
+          <h1 class="text-4xl font-bold text-gray-800 mb-2">
+            {{ instructor.firstName }} {{ instructor.lastName }}
+          </h1>
+          
+          <div class="flex items-center text-gray-600 mb-4">
+            <lucide-angular [name]="icons.MapPin" class="w-5 h-5 mr-2"></lucide-angular>
+            <span>{{ instructor.city }}</span>
+          </div>
+
+          <!-- Badges -->
+          <div class="flex flex-wrap gap-2 mb-6">
+            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              {{ instructor.gender === 'M' ? 'Homme' : 'Femme' }}
+            </span>
+            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+              {{ calculateAge(instructor.dateOfBirth) }} ans
+            </span>
+          </div>
+
+          <!-- Contact -->
+          <div class="space-y-3 mb-6">
+            <div class="flex items-center">
+              <lucide-angular [name]="icons.Mail" class="w-5 h-5 mr-2 text-blue-600"></lucide-angular>
+              <a [href]="'mailto:' + instructor.email" class="text-blue-600 hover:underline">{{ instructor.email }}</a>
+            </div>
+            <div class="flex items-center">
+              <lucide-angular [name]="icons.Phone" class="w-5 h-5 mr-2 text-blue-600"></lucide-angular>
+              <a [href]="'tel:' + instructor.phone" class="text-blue-600 hover:underline">{{ instructor.phone }}</a>
+            </div>
+          </div>
+
+          <!-- Bio -->
+          <div *ngIf="instructor.bio" class="prose max-w-none text-gray-700">
+            <p>{{ instructor.bio }}</p>
+          </div>
+          <div *ngIf="!instructor.bio" class="text-gray-500 italic">
+            Aucune biographie disponible
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Formations -->
+  <section class=" py-10">
+    <div class="container mx-auto px-6">
+      <h2 class="text-3xl font-bold text-center text-gray-800 mb-16">
+        Formations disponibles
+      </h2>
+      
+      <!-- Liste des formations -->
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div *ngFor="let formation of formations" 
+             class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-transform transform hover:scale-105">
+          <div class="relative">
+            <img [src]="formation.displayImageUrl || 'assets/default-course.jpg'" 
+                 [alt]="formation.title" 
+                 class="w-full h-48 object-cover">
+          </div>
+
+          <div class="p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-2 line-clamp-2">
+              {{ formation.title }}
+            </h3>
+            
+            <div class="flex items-center text-gray-600 mb-4">
+              <lucide-angular [name]="icons.Star" class="w-4 h-4 text-yellow-500 mr-1"></lucide-angular>
+              <span class="text-sm">{{  '4.5' }}/5 ({{  12 }} avis)</span>
+            </div>
+
+            <div class="flex items-center gap-3 mb-4">
+                <span class="bg-blue-100 text-blue-600 text-sm font-semibold px-3 py-1 rounded-full">
+                  🎯 {{formation.formationLevel}}
+                </span>
+                <span class="bg-green-100 text-green-600 text-sm font-semibold px-3 py-1 rounded-full">
+                  ⏳ {{formation.formationDuration}} heures
+                </span>
+              </div>
+
+            <div class="text-center">
+                <div class="flex justify-between items-center">
+                  <span class="text-blue-600 font-bold">{{formation.price || '0'}}TND</span>
+                  <button (click)="onLogin()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    En savoir plus
+                  </button>
+                </div>
+                
+              </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message si aucune formation -->
+      <div *ngIf="!formations || formations.length === 0" 
+           class="text-center py-12 text-gray-500">
+        <lucide-angular [name]="icons.BookOpen" class="w-12 h-12 mx-auto mb-4 text-gray-400"></lucide-angular>
+        <p class="text-xl">Cet instructeur n'a pas encore publié de formations</p>
+      </div>
+    </div>
+  </section>
+</div>
+ <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-300 py-12">
+    <div class="container mx-auto px-6 text-center">
+      <p class="text-lg">&copy; 2025 LearnAssist. Tous droits réservés.</p>
+      <p class="text-gray-400 text-sm mt-2">
+        Conçu avec <span class="text-red-500">&hearts;</span> par l'équipe LearnAssist.
+      </p>
+    </div>
+  </footer>
+
+
+<div *ngIf="isLogin" class="fixed inset-0 flex items-center justify-center z-50 bg-gray-800 bg-opacity-50 p-4">
+  <div class="absolute inset-0" (click)="isLogin = false"></div>
+  
+  <!-- Modal container -->
+  <div class="relative rounded-lg py-4 px-6 bg-white w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
+    <button (click)="isLogin = false" class="absolute top-4 right-4 text-black hover:text-gray-700">
+      ✕
+    </button>
+    <app-connexion></app-connexion>
+  </div>
+</div>

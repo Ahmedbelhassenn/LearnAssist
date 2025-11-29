@@ -1,0 +1,120 @@
+<div *ngIf="!isCourseAdded" class="container mx-auto">
+  <div class="bg-white rounded-xl  ">
+    <h2 class="text-2xl font-semibold text-center mb-6">
+      Ajouter un Cours à votre Formation : {{myformation.title}}
+    </h2>
+
+    <form #addCourseForm="ngForm" (ngSubmit)="addCourse()" >
+      <!-- Titre du cours -->
+      <div class="mb-4">
+        <label for="courseTitle" class="block text-sm font-medium text-gray-700">Titre du Cours *</label>
+        <input type="text" id="courseTitle" name="courseTitle" [(ngModel)]="newCourse.title"  required #title="ngModel"
+          required minlength="3"
+          class="mt-1 p-3 w-full border border-gray-300 rounded-md shadow-sm" placeholder="Titre du cours" />
+        <div *ngIf="title.invalid && (title.touched || title.dirty)" class="text-red-600 text-sm mt-1">
+            Le titre est requis (min. 3 caractères).
+        </div>
+        <div *ngIf="isCourseTitleExists" class="text-red-600 text-sm mt-1">
+          Vous avez déja utilisé ce titre.  
+        </div>
+      </div>
+
+      <!-- Descrition du cours -->
+      <div class="mb-4">
+        <label for="description" class="block text-sm font-medium text-gray-700">Description du Cours (optionnelle) </label>
+        <input type="text" id="description" name="description" [(ngModel)]="newCourse.description" #description="ngModel"
+           minlength="10"
+          class="mt-1 p-3 w-full border border-gray-300 rounded-md shadow-sm" placeholder="Description du cours" />
+
+          <div *ngIf="description.invalid && (description.touched || description.dirty)" class="text-red-600 text-sm mt-1">
+            La description doit contenir au moins 10 caractères.
+        </div>
+      </div>
+      
+      <!-- CHAPITRES -->
+      <div class="mb-6">
+        <h3 class="text-lg font-semibold text-indigo-600 mb-2">Chapitres</h3>
+
+        <div *ngFor="let chapter of newCourse.chapters; let i = index" class="bg-gray-50 p-4 rounded-lg mb-4 border">
+          <div class="mb-2">
+            <label class="block text-sm text-gray-700">Titre du Chapitre *</label>
+            <input type="text" [(ngModel)]="chapter.title" #chapterTitle="ngModel" name="chapterTitle{{ i }}" required
+              class="mt-1 p-2 w-full border border-gray-300 rounded-md" placeholder="Titre du chapitre" />
+              <div *ngIf="chapterTitle.invalid && (chapterTitle.touched || chapterTitle.dirty)" class="text-red-600 text-sm mt-1">
+                Le titre est requis (min. 3 caractères).
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="block text-sm text-gray-700">Description (optionnelle)</label>
+            <textarea [(ngModel)]="chapter.description" name="chapterDescription{{ i }}" rows="2"#chapterDescription="ngModel"
+              class="mt-1 p-2 w-full border border-gray-300 rounded-md"
+              placeholder="Description du chapitre"></textarea>
+              <div *ngIf="chapterDescription.invalid && (chapterDescription.touched || chapterDescription.dirty)" class="text-red-600 text-sm mt-1">
+                La description doit contenir au moins 10 caractères.
+            </div>
+          </div>
+
+          <div class="flex flex-col md:flex-row gap-4 mb-2">
+            <div class="flex-1">
+              <label class="block text-sm text-gray-700">Vidéo (optionnelle)</label>
+              <input type="file" accept="video/*" (change)="onChapterFileSelected($event, i, 'video')"
+                class="mt-1 p-2 w-full border border-gray-300 rounded-md" />
+            </div>
+            <div class="flex-1">
+              <label class="block text-sm text-gray-700">Document (optionnel)</label>
+              <input type="file" accept=".pdf,.doc,.docx" (change)="onChapterFileSelected($event, i, 'document')"
+                class="mt-1 p-2 w-full border border-gray-300 rounded-md" />
+            </div>
+          </div>
+
+          
+
+          <!-- Quiz -->
+          <div class="mb-2">
+            <label class="block text-sm text-gray-700">Quiz / Exercice (lien ou description) (optionnel)</label>
+            <input type="text" [(ngModel)]="chapter.documentUrl" name="chapterDocumentUrl{{ i }}"
+              class="mt-1 p-2 w-full border border-gray-300 rounded-md"
+              placeholder="Lien vers un quiz ou texte d'exercice" />
+          </div>
+
+          <!-- Supprimer -->
+          <button type="button" (click)="removeChapter(i)"
+            class="text-red-600 text-sm hover:underline mt-2">🗑️ Supprimer ce chapitre</button>
+        </div>
+
+        <!-- Bouton ajouter chapitre -->
+        <button type="button" (click)="addChapter()"
+          class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-medium px-4 py-2 rounded-md">
+          ➕ Ajouter un Chapitre
+        </button>
+      </div>
+
+      <!-- BOUTON AJOUTER LE COURS -->
+      <div class="text-center mt-6">
+        <button type="submit" 
+        [disabled]="!addCourseForm.form.valid"
+        class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          ✅ Ajouter le Cours
+        </button>
+      </div>
+      <div *ngIf="isCourseTitleExists" class="text-red-500 text-sm mt-2 border border-red-500 bg-red-100 p-2 rounded-md"> 
+        Ce titre de cours est déjà utilisé. Veuillez en choisir un autre.
+      </div>
+    </form>
+  </div>
+</div>
+ <!-- Confirmation de modification -->
+ <div *ngIf="isCourseAdded" class="container mb-10 mt-12">
+  <div class="bg-emerald-50 border border-emerald-200 mx-10 rounded-2xl p-6 sm:p-8 flex items-start animate-fadeIn">
+    <div class="bg-emerald-100 p-3 rounded-lg mr-4">
+      <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold text-emerald-800 mb-1">Chapitre ajouté avec succès !</h3>
+      <p class="text-sm text-emerald-700">Le cours a été enregistré et il est maintenant visible par vos étudiants.</p>
+    </div>
+  </div>
+</div>

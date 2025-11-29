@@ -1,0 +1,27 @@
+# Angular
+Learn_Assist_Frontend/LearnAssist/node_modules/
+Learn_Assist_Frontend/LearnAssist/dist/
+Learn_Assist_Frontend/LearnAssist/.angular/
+Learn_Assist_Frontend/LearnAssist/.vscode/
+
+# Spring Boot
+Learn_Assist_Backend/target/
+Learn_Assist_Backend/.mvn/
+Learn_Assist_Backend/.idea/
+Learn_Assist_Backend/*.iml
+
+# Backend - Uploads (photos, videos, files)
+Learn_Assist_Backend/uploads/
+
+# Backend - Sensitive configuration files
+Learn_Assist_Backend/src/main/resources/application.yml
+Learn_Assist_Backend/src/main/resources/application-*.yml
+Learn_Assist_Backend/src/main/resources/application.properties
+Learn_Assist_Backend/src/main/resources/application-*.properties
+
+# General
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*

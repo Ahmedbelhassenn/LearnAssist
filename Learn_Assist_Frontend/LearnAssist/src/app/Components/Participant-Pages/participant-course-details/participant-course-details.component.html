@@ -1,0 +1,177 @@
+<div class="min-h-screen bg-gray-50 flex flex-col">
+  
+    <!-- Contenu principal -->
+    <main class="flex-grow py-12">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Carte principale avec ombre subtile et transition hover -->
+        <div class="bg-white rounded-3xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8 sm:p-10 border border-gray-100">
+          
+          <div class=" mb-4"> 
+            <h1 class="text-3xl sm:text-4xl font-bold text-indigo-800 leading-tight">
+              {{ selectedCourse?.title || 'Détails du cours' }}
+            </h1>
+          </div>
+
+          <div class="prose max-w-none mb-10">
+            <p class="text-gray-600 text-lg leading-relaxed">
+              {{ selectedCourse?.description || 'Aucune description disponible pour ce cours.' }}
+            </p>
+          </div>
+
+          <!-- Liste des chapitres avec espacement amélioré -->
+          <div class="space-y-6">
+            <div *ngFor="let chapter of selectedCourse?.chapters; let i = index" class="group">
+
+              <!-- Carte de chapitre avec effet hover subtil -->
+              <div
+                class="cursor-pointer flex justify-between items-center bg-gradient-to-r from-indigo-50 to-blue-50 px-6 py-5 rounded-xl hover:from-indigo-100 hover:to-blue-100 transition-all duration-200 border border-indigo-100 shadow-sm"
+                (click)="toggleChapter(chapter.id)"
+              >
+                <div class="flex items-center space-x-4">
+                  <div class="bg-indigo-100 p-3 rounded-lg text-indigo-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="text-xl font-semibold text-gray-800 group-hover:text-indigo-700 transition-colors">
+                      Chapitre {{ i + 1 }} : {{ chapter?.title || 'Sans titre' }}
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1 truncate max-w-md">{{ chapter?.description || 'Aucune description' }}</p>
+                  </div>
+                </div>
+                <span class="text-2xl text-indigo-500 transition-transform duration-200 transform group-hover:scale-125">
+                  {{ expandedChapterId === chapter.id ? '−' : '+' }}
+                </span>
+              </div>
+            
+              <!-- Contenu détaillé avec animation -->
+              <div *ngIf="expandedChapterId === chapter.id" 
+                  class="mt-1 bg-white p-6 rounded-b-xl border-l-4 border-indigo-400 shadow-sm animate-fadeIn">
+                
+            
+                <div class="prose max-w-none mb-6">
+                  <h3 class="text-lg font-medium text-gray-800 mb-2">Description détaillée</h3>
+                  <p class="text-gray-700">{{ chapter?.description || 'Aucune description détaillée disponible.' }}</p>
+                </div>
+            
+                <!-- Section multimédia avec onglets -->
+                <div class="mb-2">
+                  <div class="border-b border-gray-200">
+                    <nav class="flex space-x-8">
+                      <button *ngIf="chapter?.videoUrl" class="py-4 px-1 border-b-2 font-medium text-sm border-indigo-500 text-indigo-600">
+                        Vidéo
+                      </button>
+                      <button *ngIf="chapter?.documentUrl" class="py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Document
+                      </button>
+                      <button *ngIf="chapter?.quiz" class="py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Quiz
+                      </button>
+                    </nav>
+                  </div>
+
+                  <!-- Contenu des onglets -->
+                  <div class="pt-4">
+                    <!-- Vidéo -->
+                    <div *ngIf="chapter?.videoUrl" class="mb-2">
+                      <div class=" h-64 bg-gray-100 rounded-lg overflow-hidden shadow">
+                        <iframe
+                          class="w-full h-full"
+                          [src]="chapter?.videoUrl | safeUrl"
+                          frameborder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowfullscreen
+                        ></iframe>
+                      </div>
+                    </div>
+                
+                    <!-- Document -->
+                    <div *ngIf="chapter?.documentUrl" class="mb-6">
+                      <div class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <div class="p-3 bg-red-50 rounded-lg text-red-500 mr-4">
+                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                          </svg>
+                        </div>
+                        <div class="flex-grow">
+                          <h4 class="font-medium text-gray-800">Document PDF</h4>
+                          <p class="text-sm text-gray-500">Téléchargez le support de cours</p>
+                        </div>
+                        <a
+                          [href]="chapter?.documentUrl"
+                          target="_blank"
+                          class="ml-4 flex-shrink-0 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          Voir
+                        </a>
+                      </div>
+                    </div>
+                
+                    <!-- Quiz -->
+                    <div *ngIf="chapter?.quiz" class="bg-blue-50 p-5 rounded-lg border border-blue-200">
+                      <div class="flex items-start">
+                        <div class="flex-shrink-0 p-3 bg-blue-100 rounded-lg text-blue-600 mr-4">
+                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 class="text-lg font-semibold text-blue-800 mb-1">Exercice / Quiz</h4>
+                          <p class="text-gray-700 mb-3">{{ chapter?.quiz?.description || 'Testez vos connaissances avec ce quiz.' }}</p>
+                          <a
+                            [href]="chapter?.quiz?.link"
+                            target="_blank"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                          >
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Commencer le quiz
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Message quand aucun chapitre -->
+        <div *ngIf="!selectedCourse?.chapters?.length" class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+          </svg>
+          <h3 class="mt-2 text-lg font-medium text-gray-900">Aucun chapitre disponible</h3>
+        </div>
+
+        
+          </div>
+      </div>
+    </main>
+  <!-- Footer avec espacement amélioré -->
+  <footer class="bg-gray-900 text-white py-8 mt-12">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col items-center justify-center">
+        <p class="text-center text-gray-300 text-sm">&copy; 2025 LearnAssist. Tous droits réservés.</p>
+        <div class="mt-2 flex space-x-6">
+          <a href="#" class="text-gray-400 hover:text-white">
+            <span class="sr-only">Conditions d'utilisation</span>
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clip-rule="evenodd"></path>
+            </svg>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-white">
+            <span class="sr-only">Confidentialité</span>
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+   
+  </div>
+  

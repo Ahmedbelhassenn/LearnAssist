@@ -1,0 +1,66 @@
+<div *ngIf="!isCourseEdited" class="container mx-auto">
+    <div class="bg-white rounded-xl  ">
+      <h2 class="text-2xl font-semibold text-center mb-6">
+        Modifier votre Cours  : {{course.title}}
+      </h2>
+  
+      <form #addCourseForm="ngForm" (ngSubmit)="editCourse()" >
+        <!-- Titre du cours -->
+        <div class="mb-4">
+          <label for="courseTitle" class="block text-sm font-medium text-gray-700">Titre du Cours *</label>
+          <input type="text" id="courseTitle" name="courseTitle" [(ngModel)]="course.title"  required #title="ngModel"
+            required minlength="3"
+            class="mt-1 p-3 w-full border border-gray-300 rounded-md shadow-sm" placeholder="Titre du cours" />
+          <div *ngIf="title.invalid && (title.touched || title.dirty)" class="text-red-600 text-sm mt-1">
+              Le titre est requis (min. 3 caractères).
+          </div>
+          <div *ngIf="isCourseTitleExists" class="text-red-600 text-sm mt-1">
+            Vous avez déja utilisé ce titre.  
+          </div>
+        </div>
+  
+        <!-- Descrition du cours -->
+        <div class="mb-4">
+          <label for="description" class="block text-sm font-medium text-gray-700">Description du Cours (optionnelle) </label>
+          <input type="text" id="description" name="description" [(ngModel)]="course.description" #description="ngModel"
+             minlength="10"
+            class="mt-1 p-3 w-full border border-gray-300 rounded-md shadow-sm" placeholder="Description du cours" />
+  
+            <div *ngIf="description.invalid && (description.touched || description.dirty)" class="text-red-600 text-sm mt-1">
+              La description doit contenir au moins 10 caractères.
+          </div>
+        </div>
+  
+        <!-- BOUTON AJOUTER LE COURS -->
+        <div class="text-center mt-6">
+          <button type="submit" 
+          [disabled]="!addCourseForm.form.valid"
+          class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            ✅ Modifier le Cours
+          </button>
+        </div>
+        <div *ngIf="isCourseTitleExists" class="text-red-500 text-sm mt-2 border border-red-500 bg-red-100 p-2 rounded-md"> 
+          Ce titre de cours est déjà utilisé. Veuillez en choisir un autre.
+        </div>
+      </form>
+    </div>
+  </div>
+  <div *ngIf="isCourseEdited" class="container mx-auto mt-6">
+    <div class="relative bg-white  animate-fadeIn">
+      <!-- Titre + icône -->
+      <div class="flex items-center gap-3 mb-4">
+        <div class="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full">
+          ✅
+        </div>
+        <h3 class="text-xl font-semibold text-green-700">Le cours a été modifié avec succès !</h3>
+      </div>
+  
+      <!-- Texte -->
+      <p class="text-gray-700">
+        Votre <strong>cours</strong> a été enregistré dans votre formation.
+      </p>
+      <p class="text-sm mt-1 text-gray-600">
+        Vous pouvez modifier les cours de la formation ou ajouter de <strong>nouveaux cours</strong>.
+      </p>
+    </div>
+  </div>

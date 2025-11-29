@@ -1,0 +1,247 @@
+<div class="flex h-[calc(98vh-64px)]"> <!-- Prend en compte la navbar -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Sidebar - Cachée sur mobile par défaut -->
+      <div [class.hidden]="!sidebarOpen && !isLargeScreen" 
+      [ngClass]="{'absolute inset-y-0 left-0 z-20': !isLargeScreen}"
+           class="w-72 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col transition-all duration-300">
+        <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="bg-indigo-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+              </div>
+              <div>
+                <h2 class="font-bold text-indigo-700">Conversations</h2>
+                <p class="text-xs text-indigo-500">{{sessions.length}} sessions</p>
+              </div>
+            </div>
+            <button (click)="toggleSidebar()" class="lg:hidden p-1 text-gray-400 hover:text-indigo-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="flex-1 min-h-0 overflow-y-auto">
+          <div class="space-y-1 p-3">
+            <button (click)="goToNewSession()" class="w-full mb-2 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-sm text-sm lg:text-base">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Nouvelle discussion
+            </button>
+            
+          <div *ngFor="let session of sessions"
+                class="group p-3 rounded-lg transition-all duration-200 border relative"
+                [ngClass]="{
+                  'bg-indigo-50 border-indigo-300': session.id === activeSessionId,
+                  'hover:bg-gray-50 border-transparent hover:border-indigo-100': session.id !== activeSessionId
+                }"
+                (click)="goToSession(session.id)">
+
+              <div class="flex justify-between items-start">
+                <div class="flex items-center space-x-2 w-full">
+                  <!-- Icon -->
+                  <div class="text-gray-400 group-hover:text-indigo-500 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+
+                  <!-- Titre ou input -->
+                  <ng-container *ngIf="editingSessionId === session.id; else titleBlock">
+                    <input [(ngModel)]="session.title"
+                          (blur)="updateSessionTitle(session)"
+                          (click)="$event.stopPropagation()"
+                          class="text-sm font-medium text-gray-700 truncate bg-transparent border-b border-gray-300 focus:outline-none focus:border-indigo-500 w-full" />
+                  </ng-container>
+                  <ng-template #titleBlock>
+                    <h3 class="text-sm font-medium text-gray-700 truncate">
+                      {{ session.title }}
+                    </h3>
+                  </ng-template>
+                </div>
+
+                <!-- Bouton 3 points -->
+                <div class="relative">
+                  <button (click)="toggleMenu(session.id, $event)"
+                          class="text-gray-400 hover:text-gray-600"
+                          (click)="$event.stopPropagation()">
+                    ⋮
+                  </button>
+
+                  <!-- Menu déroulant -->
+                  <div *ngIf="openedMenuId === session.id"
+                      class="absolute right-0 mt-1 bg-white border rounded shadow-md z-10 w-28"
+                      (click)="$event.stopPropagation()">
+                    <button (click)="startEditing(session.id, $event)"
+                            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Renommer</button>
+                    <button (click)="deleteSession(session.id); $event.stopPropagation()"
+                            class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100">Supprimer</button>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-xs text-gray-500 mt-1 truncate pl-6">{{ session.preview }}</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+  
+      <!-- Zone de chat principale -->
+      <div class="flex-1 flex flex-col bg-gray-50 w-full">
+        <!-- En-tête du chat -->
+        <div class="bg-white border-b border-gray-200 p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <!-- Bouton pour ouvrir la sidebar sur mobile -->
+              <button (click)="toggleSidebar()" class="lg:hidden p-1 text-gray-500 hover:text-indigo-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <div class="relative">
+                <img src="LearnAssistLogo.png" alt="Assistant" class="h-10 w-10 rounded-full">
+                <span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-400 ring-2 ring-white"></span>
+              </div>
+              <div>
+                <h1 class="font-semibold text-gray-800">Assistant LearnAssist</h1>
+                <p class="text-sm text-gray-500" *ngIf="loading">En train d'écrire...</p>
+                <p class="text-sm text-gray-500" *ngIf="!loading">En ligne</p>
+              </div>
+            </div>
+            <div class="flex space-x-2">
+              <button class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Conversation -->
+        <div class="flex-1 overflow-y-auto p-4" #chatContainer (scroll)="onScroll()"  >
+          <div class="max-w-3xl mx-auto space-y-4" >
+            <!-- Messages -->
+            <div *ngFor="let msg of messages" class="flex" [class.justify-end]="msg.role === 'user'">
+              <div *ngIf="msg.role === 'assistant'" class="flex space-x-3 max-w-[90%]" >
+                <div class="flex-shrink-0">
+                  <img src="LearnAssistLogo.png" alt="Assistant" class="h-8 w-8 rounded-full mt-1 lg:h-10 lg:w-10">
+                </div>
+                <div>
+                  <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 lg:p-4">
+                    <div class="message-content" [innerHTML]="markdownToHtml(msg.content)"></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">{{msg.timestamp | date:'HH:mm'}}</p>
+                </div>
+              </div>
+              
+              <div *ngIf="msg.role === 'user'" class="flex space-x-3 max-w-[90%]">
+                <div class="flex-1"></div> <!-- Espacement -->
+                <div>
+                  <div class="bg-indigo-600 p-3 rounded-lg shadow-sm lg:p-4">
+                    <p class="text-white text-sm lg:text-base">{{msg.content}}</p>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1 text-right">{{msg.timestamp | date:'HH:mm'}}</p>
+                </div>
+                <div class="flex-shrink-0">
+                  <img src="men.jpg" alt="Vous" class="h-8 w-6 rounded-full mt-1 lg:h-10 lg:w-10">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Indicateur de saisie -->
+            <div *ngIf="loading" class="flex space-x-3">
+              <div class="flex-shrink-0">
+                <img src="LearnAssistLogo.png" alt="Assistant" class="h-8 w-8 rounded-full lg:h-10 lg:w-10">
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 w-20 lg:w-24">
+                <div class="flex space-x-1">
+                  <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                  <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Zone de saisie -->
+        <div class="bg-white border-t border-gray-200 p-4">
+          <div class="max-w-3xl mx-auto">
+            
+            <div class="relative">
+              <textarea #messageInput  [(ngModel)]="userInput"
+                  (keydown.enter)="handleEnter($event)"
+                  placeholder="Écrivez votre message..."
+                  class="w-full border border-gray-300 rounded-xl pl-4 pr-12 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all duration-200 text-sm lg:text-base"
+                  rows="1">
+              </textarea>
+              <div class="absolute right-2 bottom-2 flex space-x-1">
+                <button class="p-1.5 text-gray-400 hover:text-indigo-600 rounded-full transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                  </svg>
+                </button>
+                <button (click)="send()" 
+                        [disabled]="!userInput.trim()"
+                        class="p-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-2 text-center hidden sm:block">
+              LearnAssist peut occasionnellement faire des erreurs. Vérifiez les informations importantes.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+     <!-- Modal de suppression avec style cohérent -->
+  <div *ngIf="showDeleteModal" class="fixed z-50 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+              <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
+            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+              <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                Confirmer la suppression
+              </h3>
+              <div class="mt-2">
+                <p class="text-sm text-gray-500">
+                  Êtes-vous sûr de vouloir supprimer cette discussion? Cette action est irréversible et supprimera également toutes les ressources associées.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button (click)="confirmDeleteSession()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+            Supprimer
+          </button>
+          <button (click)="showDeleteModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>

@@ -1,0 +1,262 @@
+<div class="min-h-screen bg-gray-50">
+    <!-- Hero Section -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-700" >
+      <app-navbar></app-navbar>
+      <div class="container mx-auto px-6 py-14 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">
+          Apprenez à votre rythme
+        </h1>
+        <p class="text-xl text-blue-100 mb-8">
+          Une plateforme complète pour apprendre, enseigner et grandir ensemble
+        </p>
+        <button class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+          Commencer maintenant
+        </button>
+      </div>
+    </header>
+   
+    <!-- Features Section -->
+    <section class="py-10">
+      <div class="container mx-auto px-6">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-16">
+          Pourquoi choisir notre plateforme ?
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div *ngFor="let feature of features" 
+               class="flex flex-col items-center text-center p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+            <div class="p-4 bg-blue-100 rounded-full text-blue-600 mb-4" style="width: 150px; ">
+                   <img src={{feature.icon}} alt="logo" >
+            </div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">{{feature.title}}</h3>
+            <p class="text-gray-600">{{feature.description}}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  
+    <!-- Latest Courses Section -->
+    <section class="bg-gray-100 py-10">
+      <div class="container mx-auto px-6">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-16">
+          Dernières formations
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div *ngFor="let formation of displayedFormations" 
+               class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-transform transform hover:scale-105 relative">
+            <!-- Image avec un badge prix -->
+            <div class="relative">
+              <img [src]="formation.imageUrl" [alt]="formation.title" class="w-full h-48 object-cover">
+              
+            </div>
+    
+            <div class="p-6">
+              <!-- Titre et instructeur -->
+              <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ formation.title }} </h3>
+              
+              <p class="text-gray-600 mb-4 flex items-center">
+                <lucide-angular [name]="icons.User" class="w-4 h-6 text-black"></lucide-angular>
+                <span class="ml-2">Par {{ formation.instructorName }}</span>
+              </p>
+              
+              <!-- Niveau et durée sous forme de badges -->
+              <div class="flex items-center gap-3 mb-4">
+                <span class="bg-blue-100 text-blue-600 text-sm font-semibold px-3 py-1 rounded-full">
+                  🎯 {{formation.formationLevel}}
+                </span>
+                <span class="bg-green-100 text-green-600 text-sm font-semibold px-3 py-1 rounded-full">
+                  ⏳ {{formation.formationDuration}} heures
+                </span>
+              </div>
+              <!-- Bouton -->
+              <div class="text-center">
+                <div class="flex justify-between items-center">
+                  <span class="text-blue-600 font-bold">{{formation.price}}TND</span>
+                  <button (click)="onLogin()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    En savoir plus
+                  </button>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+   <!-- Derniers Articles -->
+<section class="bg-gray-100 py-20">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center text-gray-800 mb-16">
+      Derniers articles
+    </h2>
+
+    <!-- Grille responsive -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div *ngFor="let article of articles"
+           class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-transform transform hover:scale-105 relative z-10">
+        
+        <!-- Titre -->
+        <div class="p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-2">
+            {{ article.title }}
+          </h3>
+        </div>
+
+        <!-- Image cliquable -->
+        <div class="relative">
+          <img *ngIf="article.imageblob"
+               (click)="openImage(article.imageblob, $event)"
+               [src]="article.imageblob"
+               [alt]="article.title"
+               class="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition">
+        </div>
+
+        <!-- Contenu de l'article -->
+        <div class="p-6">
+          <p class="text-gray-600 mb-4">
+            {{ article.content | slice:0:100 }}{{ article.content.length > 100 ? '...' : '' }}
+          </p>
+
+          <p class="text-sm text-gray-500 mb-4">
+            {{ article.publishedAt ? (article.publishedAt | date:'dd/MM/yyyy HH:mm') : 'Brouillon' }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal (place-la ici ou dans app.component.html si problème persiste) -->
+<div *ngIf="selectedImage"
+     class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[99999]"
+     (click)="closeImage()">
+  <div class="relative max-w-[95vw] max-h-[95vh]">
+    <!-- Bouton de fermeture -->
+  <button (click)="selectedImage = null"
+          class="absolute top-4 right-4 text-blacktext-3xl hover:text-gray-400 z-50">
+    ✕
+  </button>
+
+    <!-- Empêche la fermeture quand on clique sur l'image -->
+    <img [src]="selectedImage"
+         alt="preview"
+         (click)="$event.stopPropagation()"
+         class="max-h-[95vh] max-w-[95vw] object-contain rounded-lg shadow-lg">
+  </div>
+</div>
+    <!-- Stats Section -->
+    <section class="py-20">
+      <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+          <div *ngFor="let stat of stats" class="p-6">
+            <div class="text-4xl font-bold text-blue-600 mb-2">{{stat.number}}</div>
+            <div class="text-gray-600">{{stat.label}}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-12">
+      <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <!-- Section 1: About -->
+          <div >
+            <h3 class="text-2xl font-bold text-white mb-4 ">LearnAssist</h3>
+            <p class="text-gray-400 leading-relaxed">
+              Une plateforme e-learning complète qui permet aux formateurs de créer, gérer et partager des ressources éducatives facilement, tout en engageant les participants avec des outils interactifs et des sessions en direct.
+            </p>
+          </div>
+    
+          <!-- Section 2: Quick Links -->
+          <div>
+            <h4 class="font-semibold text-lg text-white mb-4 border-b-2 border-blue-500 inline-block pb-1">Liens rapides</h4>
+            <ul class="space-y-3">
+              <li>
+                <a href="#" class="hover:text-blue-400 flex items-center">
+                  <i class="fas fa-angle-right mr-2"></i> À propos
+                </a>
+              </li>
+              <li>
+                <a href="#" class="hover:text-blue-400 flex items-center">
+                  <i class="fas fa-angle-right mr-2"></i> Formations
+                </a>
+              </li>
+              <li>
+                <a href="#" class="hover:text-blue-400 flex items-center">
+                  <i class="fas fa-angle-right mr-2"></i> Blog
+                </a>
+              </li>
+              <li>
+                <a href="#" class="hover:text-blue-400 flex items-center">
+                  <i class="fas fa-angle-right mr-2"></i> Contact
+                </a>
+              </li>
+            </ul>
+          </div>
+    
+          <!-- Section 3: Legal -->
+          <div>
+            <h4 class="font-semibold text-lg text-white mb-4 border-b-2 border-blue-500 inline-block pb-1">Légal</h4>
+            <ul class="space-y-3">
+              <li>
+                <a href="#" class="hover:text-blue-400 flex items-center">
+                  <i class="fas fa-gavel mr-2"></i> Conditions d'utilisation
+                </a>
+              </li>
+              <li>
+                <a href="#" class="hover:text-blue-400 flex items-center">
+                  <i class="fas fa-lock mr-2"></i> Politique de confidentialité
+                </a>
+              </li>
+              <li>
+                <a href="#" class="hover:text-blue-400 flex items-center">
+                  <i class="fas fa-file-alt mr-2"></i> Mentions légales
+                </a>
+              </li>
+            </ul>
+          </div>
+    
+          <!-- Section 4: Newsletter -->
+          <div>
+            <h4 class="font-semibold text-lg text-white mb-4 border-b-2 border-blue-500 inline-block pb-1">Newsletter</h4>
+            <p class="text-gray-400 mb-4 leading-relaxed">
+              Restez informé de nos dernières actualités et offres.
+            </p>
+            <div class="flex">
+              <input
+                type="email"
+                placeholder="Votre email"
+                class="px-4 py-3 rounded-l-lg w-full focus:outline-none text-gray-800"
+              />
+              <button class="bg-blue-600 px-4 py-3 rounded-r-lg hover:bg-blue-700 text-white">
+                S'abonner
+              </button>
+            </div>
+          </div>
+        </div>
+    
+        <!-- Footer Bottom -->
+        <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+          <p>&copy; 2025 LearnAssist. Tous droits réservés.</p>
+          <p class="text-gray-500 text-sm mt-2">
+            Conçu avec <span class="text-red-500">&hearts;</span> par l'équipe LearnAssist.
+          </p>
+        </div>
+      </div>
+    </footer>
+    
+  </div>
+<div *ngIf="isLogin" class="fixed inset-0 flex items-center justify-center z-50 bg-gray-800 bg-opacity-50 p-4">
+  <div class="absolute inset-0" (click)="isLogin = false"></div>
+  
+  <!-- Modal container -->
+  <div class="relative rounded-lg py-4 px-6 bg-white w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
+    <button (click)="isLogin = false" class="absolute top-4 right-4 text-black hover:text-gray-700">
+      ✕
+    </button>
+    <app-connexion></app-connexion>
+  </div>
+</div>
+  

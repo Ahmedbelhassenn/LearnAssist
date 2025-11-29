@@ -1,0 +1,56 @@
+<div class="min-h-screen flex flex-col bg-gray-50">
+  
+    <!-- Contenu principal -->
+    <main class="flex-1">
+      <div class="container mx-auto px-6 py-10">
+        <!-- Titre principal -->
+        <div class="text-center mb-12">
+          <h1 class="text-4xl font-bold text-gray-800 mb-2">Toutes les Formations</h1>
+          <p class="text-gray-600">Explorez nos catégories et trouvez votre prochaine aventure d'apprentissage.</p>
+        </div>
+  
+        <!-- Catégories -->
+        <div class="flex flex-wrap justify-center gap-4 mb-10">
+          <button *ngFor="let category of categories"
+                  (click)="selectCategory(category)"
+                  [class.bg-indigo-600]="selectedCategory === category"
+                  [class.text-white]="selectedCategory === category"
+                  class="px-6 py-2 bg-indigo-100 text-indigo-700 font-semibold rounded-full shadow hover:bg-indigo-200 transition">
+            {{ category }}
+          </button>
+        </div>
+  
+        <!-- Formations -->
+        <div class="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div *ngFor="let formation of filteredFormations()" class="bg-white rounded-2xl shadow-md hover:shadow-xl transition p-6">
+            <img [src]="formation.imageUrl" alt="Image de formation" class="w-full h-40 object-cover rounded-xl mb-4">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ formation.title }}</h2>
+            <p class="text-gray-600 mb-4 line-clamp-3">{{ formation.description }}</p>
+  
+            <div class="flex items-center justify-between mt-4">
+              <div class="flex items-center text-sm text-gray-500">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {{ formation.duration }} heures
+              </div>
+  
+              <button (click)="goToFormationDetails(formation.id)" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition">
+                Voir Détail
+              </button>
+            </div>
+          </div>
+        </div>
+  
+      </div>
+    </main>
+  
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8">
+      <div class="container mx-auto px-4 text-center">
+        <p class="text-gray-300 text-sm">&copy; 2025 LearnAssist. Tous droits réservés.</p>
+      </div>
+    </footer>
+  </div>
+  

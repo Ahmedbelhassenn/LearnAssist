@@ -1,0 +1,112 @@
+
+<div class="  bg-gray-50 flex  justify-center py-4 sm:py-5 lg:py-6">
+    <div class="bg-white rounded-lg shadow-md max-w-4xl w-full p-6">
+      <div class="text-center pb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Mettre à Jour le Profil</h2>
+        <p class="text-gray-600">Cher instructeur, mettez à jour votre profil ici.
+            Il n'est pas nécessaire de changer mot de passe.
+        </p>
+      </div>
+      <form class="grid grid-cols-2 gap-4" (ngSubmit)="onSubmit()" #registerForm="ngForm">
+        <div class="space-y-4">
+          <div>
+            <label for="firstName" class="block text-sm font-medium text-gray-700">Prénom *</label>
+            <input type="text" id="firstName" name="firstName" [(ngModel)]="participant.firstName" #firstName="ngModel" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            <div *ngIf="firstName.invalid && (firstName.dirty || firstName.touched)" class="error">
+              Prénom est requis
+            </div>
+          </div>
+          <div>
+            <label for="gender" class="block text-sm font-medium text-gray-700">Genre *</label>
+            <select id="gender" name="gender"  required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="Male">Masculin</option>
+              <option value="Female">Féminin</option>
+              <option value="Other">Autre</option>
+            </select>
+          </div>
+          <div>
+            <label for="educationLevel" class="block text-sm font-medium text-gray-700">Niveau d'éducation *</label>
+            <input type="text" id="educationLevel" name="educationLevel" [(ngModel)]="participant.educationLevel" #educationLevel="ngModel" 
+            required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            <div *ngIf="educationLevel.invalid && (educationLevel.dirty || educationLevel.touched)" class="error">
+              Niveau d'éducation est requis 
+            </div>
+          </div>
+          <div>
+            <label for="newPassword" class="block text-sm font-medium text-gray-700">Nouveau Mot de Passe *</label>
+            <input type="password" id="newPassword" name="newPassword" [(ngModel)]="participant.password" #newPassword="ngModel" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
+              class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+          </div>
+          <p class="mt-1 text-xs text-gray-500">Minimum 8 caractères, incluant majuscules, minuscules et chiffres.</p>
+          <div class="text-red-500 text-sm mt-1">
+            <p *ngIf="newPassword.errors?.['minlength']">Le mot de passe doit contenir au moins 8 caractères.</p>
+            <p *ngIf="newPassword.errors?.['pattern']">
+              Le mot de passe doit contenir une majuscule, une minuscule et un chiffre.
+            </p>
+          </div>
+        
+          
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label for="lastName" class="block text-sm font-medium text-gray-700">Nom *</label>
+            <input type="text" id="lastName" [(ngModel)]="participant.lastName" #lastName="ngModel" name="lastName" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            <div *ngIf="lastName.invalid && (lastName.dirty || lastName.touched)" class="error">
+              Nom est requis
+            </div>
+          </div>
+          <div>
+            <label for="mobile" class="block text-sm font-medium text-gray-700">Mobile *</label>
+            <input type="tel" id="mobile" name="mobile" [(ngModel)]="participant.phone" #phone="ngModel" pattern="^\+\d{1,3}\s\d{6,14}$"
+             required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+             <div *ngIf="phone.invalid && (phone.dirty || phone.touched)" class="text-red-500 text-sm mt-1">
+              <p *ngIf="phone.errors?.['required']">Le numéro de téléphone est requis.</p>
+              <p *ngIf="phone.errors?.['pattern']">Veuillez entrer un numéro valide sous forme +216 2222222.</p>
+            </div>
+          </div>
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">Ancien Mot de Passe *</label>
+            <input type="password" id="password" name="password" [(ngModel)]="oldPassword"  #password="ngModel"  minlength='8' class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            <div *ngIf="password.invalid && (password.dirty || password.touched)" class="error">
+                <p *ngIf="password.errors?.['required']"> Ancien Mot de Passe est requis </p>
+                <p *ngIf="password.errors?.['minlength']"> Le mot de passe doit contenir au moins 8 caractères. </p>
+            </div>
+            <div *ngIf="!isOldPasswordFilled" class="error">
+                Ancien Mot de Passe est requis
+            </div>
+            <p class="error" *ngIf="!isOldPasswordtrue">Ancien mot de passe incorrect! </p>
+          </div>
+          <div>
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmer Nouveau Mot de passe *</label>
+            <input type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            [(ngModel)]="participant.confirmPassword"
+            #confirmPasswordInput="ngModel"
+            [pattern]="participant.password"
+             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            <div  class="text-red-500 text-sm mt-1">
+              <p *ngIf="confirmPasswordInput.errors?.['pattern']">Les mots de passe ne correspondent pas.</p>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!arePasswordsSame" class="error">
+            Les mots de passe ne correspondent pas.
+        </div>
+        <div class="col-span-2 flex justify-center">
+          <button type="submit" [disabled]="!registerForm.form.valid " class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            Mettre à jour
+          </button>
+          
+        </div>
+        <div *ngIf="isProfileModified"  class="col-span-2 flex justify-center mt-4 px-4 py-2 bg-green-100 border border-green-400 text-green-700 rounded-lg shadow-md animate-fadeIn">
+            ✅ Modification de profil avec succès !
+        </div>
+      </form>
+    </div>
+  </div>
+      <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-300 py-10 text-center">
+        <p>&copy; 2025 LearnAssist. Tous droits réservés.</p>
+    </footer>
+  

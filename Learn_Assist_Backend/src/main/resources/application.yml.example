@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: EduBot
+  datasource:
+    url: jdbc:postgresql://localhost:5432/your_database_name
+    username: your_username
+    password: your_password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  ai:
+    openai:
+      api-key: your_openai_api_key_here
+      chat:
+        options:
+          model: gpt-4o-mini
+
+jwt:
+  secret: your_jwt_secret_key_here
+  expiration: 86400000
+
+file:
+  upload-dir: uploads/

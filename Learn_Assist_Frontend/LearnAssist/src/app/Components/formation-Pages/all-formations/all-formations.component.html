@@ -1,0 +1,179 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="bg-white rounded-xl shadow-sm p-6">
+    <!-- En-tête avec bouton d'ajout -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Mes Formations</h1>
+      <button (click)="openFormationModal()" 
+              class="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <lucide-angular [name]="icons.Plus" class="w-5 h-5 mr-2"></lucide-angular>
+        Nouvelle formation
+      </button>
+    </div>
+
+    <!-- Filtres et recherche -->
+    <div class="mb-6 flex flex-col sm:flex-row gap-4">
+      <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()"
+             placeholder="Rechercher par titre ou description..." 
+             class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+      
+      <select [(ngModel)]="statusFilter" (change)="applyFilters()"
+              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+        <option value="all">Tous les statuts</option>
+        <option value="published">Publiées</option>
+        <option value="draft">Brouillons</option>
+      </select>
+    </div>
+
+    <!-- Liste des formations -->
+    <div *ngIf="filteredCourses.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Cards responsive -->
+        <div *ngFor="let course of filteredCourses"
+             class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-transform transform hover:scale-105">
+          <img [src]="course.imageUrl" [alt]="course.title" class="w-full h-40 sm:h-48 object-cover" />
+          <div class="p-4 sm:p-6">
+            <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">{{ course.title }}</h3>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="bg-blue-100 text-blue-600  font-semibold px-3 py-1 rounded-full">
+                🎯 {{ course.formationLevel }}
+              </span>
+              <span class="bg-green-100 text-green-600  font-semibold px-3 py-1 rounded-full">
+                ⏳ {{ course.formationDuration }} heures
+              </span>
+              <span class="bg-gray-100 text-blue-600  font-bold px-3 py-1 rounded-full">
+                {{ course.price }} TND
+              </span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 mb-4">
+              <button (click)="openEditFormationModal(course.id)"
+                      class="flex items-center justify-center px-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 w-full sm:w-auto">
+                <lucide-angular [name]="icons.Edit" class="w-5 h-5 mr-2"></lucide-angular> Modifier
+              </button>
+              <button (click)="openAddCourseModal(course.id)"
+                      class=" px-1 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700">
+                ➕ Ajouter un cours
+              </button>
+              <button (click)="goToFormationDetails(course.id)"
+                      class=" px-1 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
+                Voir la formation
+              </button>
+              <button (click)="openStatusModal(course.id, course.status === 'draft' ? 'published' : 'draft')"
+                      [ngClass]="{
+                        'bg-green-500 hover:bg-green-600': course.status === 'draft',
+                        'bg-yellow-500 hover:bg-yellow-600': course.status !== 'draft'
+                      }"
+                      class="flex items-center justify-center px-3 py-2 text-white rounded-lg w-full sm:w-auto">
+                <lucide-angular [name]="course.status === 'draft' ? icons.Upload : icons.FileEdit" class="w-5 h-5 mr-2"></lucide-angular>
+                {{ course.status === 'draft' ? 'Publier' : 'Mettre en brouillon' }}
+              </button>
+              <button (click)="openDeleteModal(course.id)"
+                      class="flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full sm:w-auto">
+                <lucide-angular [name]="icons.Trash2" class="w-5 h-5 mr-2"></lucide-angular> Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--Modals-->
+      
+      <!-- Ajouter formation-->
+      <div *ngIf="isFormationModalOpen" class="fixed inset-0 z-50 bg-gray-800 bg-opacity-50 overflow-y-auto">
+        <div class="relative rounded-lg py-6 px-4 sm:px-8 mx-auto mt-10 mb-10 bg-white w-full max-w-4xl">
+          <button (click)="closeFormationModal()" class="absolute top-4 right-4 text-black text-xl">✕</button>
+          <app-add-formation></app-add-formation>
+        </div>
+      </div>
+
+      <!--Modifier formation-->
+      <div *ngIf="isEditFormationModalOpen" class="fixed inset-0 z-50 bg-gray-800 bg-opacity-50 overflow-y-auto">
+        <div class="relative rounded-lg py-6 px-4 sm:px-8 mx-auto mt-10 mb-10 bg-white w-full max-w-4xl">
+          <button (click)="closeEditFormationModal()" class="absolute top-4 right-4 text-black text-xl">✕</button>
+          <app-edit-formation></app-edit-formation>
+        </div>
+      </div>
+
+      <!--Ajouter Cours-->
+      <div *ngIf="showAddCourseModal" class="fixed inset-0 z-50 bg-gray-800 bg-opacity-50 overflow-y-auto">
+        <div class="relative rounded-lg py-6 px-8 mx-auto mt-10 mb-10  bg-white w-full max-w-4xl">
+          <button (click)="closeAddCourseModal()" class="absolute top-4 right-4 text-black text-xl">
+            ✕
+          </button>
+          <app-add-courses></app-add-courses>
+        </div>
+      </div>
+
+      <!-- Modal de confirmation de supression -->
+      <div *ngIf="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Confirmation</h2>
+          <p class="text-gray-600 mb-6">Êtes-vous sûr de vouloir supprimer cette formation ? Cette action est irréversible.</p>
+          <div class="flex justify-end gap-4">
+            <button (click)="showDeleteModal = false" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">
+              Annuler
+            </button>
+            <button (click)="deleteFormation()"class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de confirmation de publication/brouillon -->
+      <div *ngIf="showStatusModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Confirmation</h2>
+          <p class="text-gray-600 mb-6">
+            Êtes-vous sûr de vouloir 
+            <span class="font-semibold" [ngClass]="{
+              'text-green-600': pendingStatus === 'published',
+              'text-yellow-600': pendingStatus === 'draft'
+            }">
+              {{ pendingStatus === 'published' ? 'publier' : 'mettre en brouillon' }}
+            </span> 
+            cette formation ?
+          </p>
+          <div class="flex justify-end gap-4">
+            <button (click)="cancelStatusChange()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">
+              Annuler
+            </button>
+            <button (click)="confirmStatusChange()" 
+                    [ngClass]="{
+                      'bg-green-600 hover:bg-green-700': pendingStatus === 'published',
+                      'bg-yellow-500 hover:bg-yellow-600': pendingStatus === 'draft'
+                    }"
+                    class="px-4 py-2 text-white rounded">
+              Confirmer
+            </button>
+          </div>
+        </div>
+      </div>
+      
+
+
+
+    <!-- Message si aucune formation filtrée-->
+    <div *ngIf="filteredCourses.length === 0 && !isFormationsEmpty" class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+      </svg>
+      <h3 class="mt-2 text-lg font-medium text-gray-900">Aucune formation trouvée</h3>
+      <p class="mt-1 text-gray-500">Aucune formation ne correspond à vos critères de recherche</p>
+      <button (click)="resetFilters()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        Réinitialiser les filtres
+      </button>
+    </div>
+
+    <!-- Message si aucune formation -->
+    <div *ngIf="isFormationsEmpty" class="text-center py-12">
+      <lucide-angular [name]="icons.BookOpen" class="w-12 h-12 mx-auto text-gray-300 mb-4"></lucide-angular>
+      <h3 class="text-xl font-medium text-gray-500">Aucune formation trouvée</h3>
+      <p class="text-gray-400 mt-2">Commencez par créer votre première formation</p>
+      <button (click)="openFormationModal()" 
+              class="mt-4 px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        Créer une formation
+      </button>
+    </div>
+  </div>
+</div>

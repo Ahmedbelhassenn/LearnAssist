@@ -1,0 +1,347 @@
+<div class="min-h-screen bg-gray-50"> 
+  <!-- Hero Section --> 
+  <header class="bg-gradient-to-r from-blue-800 to-blue-600 shadow-lg">
+    <div class="container mx-auto px-6 py-10 text-center">
+      <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">
+        Bienvenue, {{username}} !
+      </h1>
+      <p class="text-xl text-blue-100 mb-8">
+        Gérez vos formations et interagissez avec vos étudiants.
+      </p>
+      <button (click)="openBioModal()" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+        Modifier votre Bio
+      </button>
+    </div>
+  </header>
+  
+  <!-- Modal -->
+  <div *ngIf="isBioModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50 ">
+    <div class="bg-white p-6 rounded-lg w-96 z-50">
+      <h2 class="text-2xl font-semibold mb-4">Modifier votre bio</h2>
+      <textarea [(ngModel)]="bio" class="w-full h-32 p-4 border rounded-lg"></textarea>
+      <div class="mt-4 text-right">
+        <button (click)="saveBio()" class="bg-blue-600 text-white px-6 py-2 rounded-lg mr-2">Enregistrer</button>
+        <button (click)="closeBioModal()" class="bg-gray-400 text-white px-6 py-2 rounded-lg">Annuler</button>
+      </div>
+    </div>
+  </div>
+  
+  
+  <main class="container mx-auto px-6 py-8">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div *ngFor="let stat of stats" class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="p-3 bg-blue-100 rounded-full">
+            <lucide-angular [name]="stat.icon" class="w-6 h-6 text-blue-600"></lucide-angular>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-gray-500 text-sm">{{ stat.label }}</h3>
+            <p class="text-2xl font-semibold">{{ stat.value }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Course Management -->
+      <div class="lg:col-span-2">
+        <div class="bg-white  rounded-lg shadow p-4 sm:p-6">
+          <!-- Header -->
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+            <h2 class="text-xl font-semibold text-center sm:text-left">Mes formations ({{ courses.length }})</h2>
+            <button (click)="openFormationModal()" class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto">
+              <lucide-angular [name]="icons.Plus" class="w-5 h-5 mr-2"></lucide-angular>
+              Ajouter une formation
+            </button>
+          </div>
+    
+          <!-- Modals -->
+          <div *ngIf="isFormationModalOpen" class="fixed inset-0 z-50 bg-gray-800 bg-opacity-50 overflow-y-auto">
+            <div class="relative rounded-lg py-6 px-4 sm:px-8 mx-auto mt-10 mb-10 bg-white w-full max-w-4xl">
+              <button (click)="closeFormationModal()" class="absolute top-4 right-4 text-black text-xl">✕</button>
+              <app-add-formation></app-add-formation>
+            </div>
+          </div>
+    
+          <div *ngIf="isEditFormationModalOpen" class="fixed inset-0 z-50 bg-gray-800 bg-opacity-50 overflow-y-auto">
+            <div class="relative rounded-lg py-6 px-4 sm:px-8 mx-auto mt-10 mb-10 bg-white w-full max-w-4xl">
+              <button (click)="closeEditFormationModal()" class="absolute top-4 right-4 text-black text-xl">✕</button>
+              <app-edit-formation></app-edit-formation>
+            </div>
+          </div>
+
+          <!-- Articles Modal -->
+          <div *ngIf="isArticleModalOpen" class="fixed inset-0 z-50 bg-gray-800 bg-opacity-50 overflow-y-auto flex items-center  justify-center ">
+            <div class="absolute inset-0 " ></div>
+            <div class="relative rounded-lg  bg-white" style="width: 40%;">
+              <button (click)="closeArticleModal()" class=" absolute top-4 right-4 text-black hover:text-gray-700">
+                ✕
+              </button>
+              <app-add-article></app-add-article>
+            </div>
+          </div>
+    
+          <!-- Aucune formation -->
+          <div *ngIf="courses.length === 0" class="text-center text-gray-600">
+            Ajoutez votre première formation
+          </div>
+    
+          <!-- Cards responsive -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-6">
+            <div *ngFor="let course of displayedCourses"
+                 class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-transform transform hover:scale-105">
+              <img [src]="course.imageUrl" [alt]="course.title" class="w-full h-40 sm:h-48 object-cover" />
+              <div class="p-4 sm:p-6">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">{{ course.title }}</h3>
+    
+                <div class="flex flex-wrap gap-2 mb-4">
+                  <span class="bg-blue-100 text-blue-600  font-semibold px-3 py-1 rounded-full">
+                    🎯 {{ course.formationLevel }}
+                  </span>
+                  <span class="bg-green-100 text-green-600  font-semibold px-3 py-1 rounded-full">
+                    ⏳ {{ course.formationDuration }} heures
+                  </span>
+                  <span class="bg-gray-100 text-blue-600  font-bold px-3 py-1 rounded-full">
+                    {{ course.price }} TND
+                  </span>
+                </div>
+    
+                <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 mb-4">
+                  <button (click)="openEditFormationModal(course.id)"
+                          class="flex items-center justify-center px-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 w-full sm:w-auto">
+                    <lucide-angular [name]="icons.Edit" class="w-5 h-5 mr-2"></lucide-angular> Modifier
+                  </button>
+                  <button (click)="openAddCourseModal(course.id)"
+                          class=" px-1 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700">
+                    ➕ Ajouter un cours
+                  </button>
+                  <button (click)="goToFormationDetails(course.id)"
+                          class=" px-1 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
+                    Voir la formation
+                  </button>
+                  <button (click)="openStatusModal(course.id, course.status === 'draft' ? 'published' : 'draft')"
+                          [ngClass]="{
+                            'bg-green-500 hover:bg-green-600': course.status === 'draft',
+                            'bg-yellow-500 hover:bg-yellow-600': course.status !== 'draft'
+                          }"
+                          class="flex items-center justify-center px-3 py-2 text-white rounded-lg w-full sm:w-auto">
+                    <lucide-angular [name]="course.status === 'draft' ? icons.Upload : icons.FileEdit" class="w-5 h-5 mr-2"></lucide-angular>
+                    {{ course.status === 'draft' ? 'Publier' : 'Mettre en brouillon' }}
+                  </button>
+                  <button (click)="openDeleteModal(course.id)"
+                          class="flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full sm:w-auto">
+                    <lucide-angular [name]="icons.Trash2" class="w-5 h-5 mr-2"></lucide-angular> Supprimer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="showViewMoreButton" class="flex justify-center mt-6">
+            <a routerLink="/instructor/all-formation" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+              Voir plus
+            </a>
+          </div>
+        
+      </div>
+    </div>
+    
+      <!-- Modal de confirmation -->
+      <div *ngIf="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Confirmation</h2>
+          <p class="text-gray-600 mb-6">Êtes-vous sûr de vouloir supprimer cette formation ? Cette action est irréversible.</p>
+          
+          <div class="flex justify-end gap-4">
+            <button (click)="showDeleteModal = false" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">
+              Annuler
+            </button>
+            <button (click)="deleteFormation()"class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de confirmation de publication/brouillon -->
+      <div *ngIf="showStatusModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Confirmation</h2>
+
+          <p class="text-gray-600 mb-6">
+            Êtes-vous sûr de vouloir 
+            <span class="font-semibold" [ngClass]="{
+              'text-green-600': pendingStatus === 'published',
+              'text-yellow-600': pendingStatus === 'draft'
+            }">
+              {{ pendingStatus === 'published' ? 'publier' : 'mettre en brouillon' }}
+            </span> 
+            cette formation ?
+          </p>
+
+          <div class="flex justify-end gap-4">
+            <button (click)="cancelStatusChange()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">
+              Annuler
+            </button>
+            <button (click)="confirmStatusChange()" 
+                    [ngClass]="{
+                      'bg-green-600 hover:bg-green-700': pendingStatus === 'published',
+                      'bg-yellow-500 hover:bg-yellow-600': pendingStatus === 'draft'
+                    }"
+                    class="px-4 py-2 text-white rounded">
+              Confirmer
+            </button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="showAddCourseModal" class="fixed inset-0 z-50 bg-gray-800 bg-opacity-50 overflow-y-auto">
+        <div class="relative rounded-lg py-6 px-8 mx-auto mt-10 mb-10  bg-white w-full max-w-4xl">
+          <button (click)="closeAddCourseModal()" class="absolute top-4 right-4 text-black text-xl">
+            ✕
+          </button>
+          <app-add-courses></app-add-courses>
+        </div>
+      </div>
+
+      
+
+
+      <div class="space-y-6">
+        <!-- Articles Section -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Mes Articles</h2>
+            <button (click)="openCreateArticleModal()" 
+                    class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <lucide-angular [name]="icons.Plus" class="w-5 h-5 mr-2"></lucide-angular>
+              Nouvel article
+            </button>
+          </div>
+
+        <!-- Articles List -->
+        <div class="space-y-4">
+          <div *ngFor="let article of articles.slice(articles.length - 1, articles.length)" 
+              class="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+            <div class="flex items-start gap-4">
+              <img *ngIf="article.imageblob" 
+                  [src]="article.imageblob" 
+                  [alt]="article.title" 
+                  class="w-16 h-16 object-cover rounded-md">
+              <div class="flex-1">
+                <h3 class="font-semibold text-gray-800">{{ article.title }}</h3>
+                <p class="text-sm  mt-1">
+                  {{ article.content | slice:0:100 }}{{ article.content.length > 100 ? '...' : '' }}
+                </p>
+                <p class="text-sm text-gray-500 mt-1">
+                  {{ article.publishedAt ? (article.publishedAt | date:'dd/MM/yyyy HH:MM') : 'Brouillon' }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+      <!-- Empty State -->
+      <div *ngIf="articles.length === 0" class="text-center py-8 text-gray-500">
+        <lucide-angular [name]="icons.FileText" class="w-12 h-12 mx-auto text-gray-300 mb-2"></lucide-angular>
+        <p>Aucun article pour le moment</p>
+        <button (click)="openCreateArticleModal()" class="text-blue-600 hover:underline mt-2">
+          Créer votre premier article
+        </button>
+      </div>
+    </div>
+
+    <!-- View All Button -->
+    <div *ngIf="articles.length > 0" class="mt-4 flex justify-center">
+      <a routerLink="/instructor/articles" 
+         class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+        Voir tous les articles ({{ articles.length }})
+      </a>
+    </div>
+  </div>
+
+  <!-- Pending Requests Section (compacte et claire) -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-xl font-semibold mb-4">Demandes d'approbation</h2>
+
+          <div class="space-y-3">
+            <div *ngFor="let request of pendingRequests.slice(0, 3)" 
+                class="flex items-center justify-between  px-4 py-2 rounded-md hover:bg-gray-100 transition">
+
+              <div class="flex flex-col text-sm">
+                <span class="text-gray-800 font-medium">{{ request.participantName }}</span>
+                <span class="text-gray-500">→ {{ request.formationTitle }}</span>
+                <span class="text-gray-400 text-xs">{{ request.createdAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+              </div>
+
+              <div class="flex gap-1">
+                <button (click)="openConfirmationModal(request, 'approve')"  
+                        class="text-green-600 hover:text-green-700 px-2 py-1 text-xs font-semibold rounded">
+                  Approuver
+                </button>
+                <button (click)="openConfirmationModal(request, 'reject')"  
+                        class="text-red-600 hover:text-red-700 px-2 py-1 text-xs font-semibold rounded">
+                  Rejeter
+                </button>
+              </div>
+            </div>
+
+            <!-- Aucune demande -->
+            <div *ngIf="pendingRequests.length === 0" class="text-gray-500 text-sm text-center mt-4">
+              Aucune demande pour le moment.
+            </div>
+          </div>
+
+          <!-- Voir plus bouton -->
+          <div class="mt-6 flex justify-center">
+            <a routerLink="/instructor/requests" class="px-5 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition">
+              Voir toutes les demandes
+            </a>
+          </div>
+        </div>
+
+        
+      </div>
+    </div>
+   <!-- Modal de confirmation -->
+    <div *ngIf="confirmationModal.isOpen" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+        <div class="p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2 rounded-full" [ngClass]="{
+              'bg-green-100 text-green-600': confirmationModal.type === 'approve',
+              'bg-red-100 text-red-600': confirmationModal.type === 'reject'
+            }">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path *ngIf="confirmationModal.type === 'approve'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                <path *ngIf="confirmationModal.type === 'reject'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-800">
+              {{ confirmationModal.type === 'approve' ? 'Confirmer l\'approbation' : 'Confirmer le rejet' }}
+            </h2>
+          </div>
+
+          <p class="text-gray-600 mb-6">
+            Êtes-vous sûr de vouloir {{ confirmationModal.type === 'approve' ? 'approuver' : 'rejeter' }} la demande de 
+            <span class="font-semibold">{{ confirmationModal.data?.participantName }}</span> pour la formation 
+            <span class="font-semibold">"{{ confirmationModal.data?.formationTitle }}"</span> ?
+          </p>
+
+          <div class="flex justify-end gap-3">
+            <button (click)="cancelConfirmation()" 
+                    class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+              Annuler
+            </button>
+            <button (click)="confirmAction()" 
+                    [ngClass]="{
+                      'bg-green-600 hover:bg-green-700': confirmationModal.type === 'approve',
+                      'bg-red-600 hover:bg-red-700': confirmationModal.type === 'reject'
+                    }"
+                    class="px-4 py-2 text-white rounded-lg transition-colors">
+              Confirmer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

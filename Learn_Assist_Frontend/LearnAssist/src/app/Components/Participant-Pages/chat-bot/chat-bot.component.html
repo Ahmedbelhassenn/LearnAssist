@@ -1,0 +1,98 @@
+<!-- Floating Button -->
+<button *ngIf="!isOpen" (click)="toggleChat()" 
+        class="fixed bottom-8 right-8 bg-indigo-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all duration-300 z-50">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+  </svg>
+</button>
+
+<!-- Chat Window -->
+<div *ngIf="isOpen" class="fixed bottom-6 right-8 w-96 h-[600px] bg-white rounded-xl shadow-xl flex flex-col border border-gray-200 overflow-hidden z-30 animate-slide-up">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <img src="LearnAssistLogo.png" alt="Assistant" class="w-10 h-10 rounded-full object-cover">
+      <div>
+        <h3 class="font-semibold">LearnAssist</h3>
+        <p class="text-xs opacity-90">En ligne</p>
+      </div>
+    </div>
+    <button (click)="toggleChat()" class="text-white hover:bg-white hover:bg-opacity-20 p-1 rounded-full transition">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-4" #chatContainer (scroll)="onScroll()"  >
+    <div class="max-w-3xl mx-auto space-y-4" >
+      <!-- Messages -->
+      <div *ngFor="let msg of messages" class="flex" [class.justify-end]="msg.role === 'user'">
+        <div *ngIf="msg.role === 'assistant'" class="flex space-x-3 max-w-[90%]" >
+          <div class="flex-shrink-0">
+            <img src="LearnAssistLogo.png" alt="Assistant" class="h-8 w-8 rounded-full mt-1 lg:h-10 lg:w-10">
+          </div>
+          <div>
+            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 lg:p-4">
+              <div class="message-content" [innerHTML]="markdownToHtml(msg.content)"></div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">{{msg.timestamp | date:'HH:mm'}}</p>
+          </div>
+        </div>
+        
+        <div *ngIf="msg.role === 'user'" class="flex space-x-3 max-w-[90%]">
+          <div class="flex-1"></div> <!-- Espacement -->
+          <div>
+            <div class="bg-indigo-600 p-3 rounded-lg shadow-sm lg:p-4">
+              <p class="text-white text-sm lg:text-base">{{msg.content}}</p>
+            </div>
+            <p class="text-xs text-gray-500 mt-1 text-right">{{msg.timestamp | date:'HH:mm'}}</p>
+          </div>
+          <div class="flex-shrink-0">
+            <img src="men.jpg" alt="Vous" class="h-8 w-8 rounded-full mt-1 lg:h-10 lg:w-10">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Indicateur de saisie -->
+      <div *ngIf="loading" class="flex space-x-3">
+        <div class="flex-shrink-0">
+          <img src="LearnAssistLogo.png" alt="Assistant" class="h-8 w-8 rounded-full lg:h-10 lg:w-10">
+        </div>
+        <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 w-20 lg:w-24">
+          <div class="flex space-x-1">
+            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll to bottom button -->
+  <div *ngIf="userScrolledUp" 
+       class="absolute bottom-20 right-4 bg-indigo-600 text-white w-10 h-10 rounded-full flex items-center justify-center cursor-pointer shadow-md hover:bg-indigo-700 transition"
+       (click)="scrollToBottom()">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+    </svg>
+  </div>
+
+  <!-- Input Area -->
+  <div class="border-t border-gray-200 p-4 bg-white">
+    <div class="flex gap-2">
+      <input [(ngModel)]="userInput" 
+             (keyup.enter)="send()"
+             class="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+             placeholder="Écrivez votre message...">
+      <button (click)="send()" 
+              [disabled]="!userInput.trim()"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white w-11 h-11 rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

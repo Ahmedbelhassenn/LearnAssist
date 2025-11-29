@@ -1,0 +1,19 @@
+/* Général */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  input, textarea, select {
+    font-size: 1rem;
+  }
+  
+  /* Styles pour les boutons et le formulaire */
+  button {
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #2c5282;
+  }
+  

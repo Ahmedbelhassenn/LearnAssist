@@ -1,0 +1,171 @@
+<div class="min-h-screen bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center py-4 sm:py-5 lg:py-6">
+    <div class="max-w-3xl w-full bg-white rounded-lg shadow-md p-6">
+      <div class="flex justify-between items-center w-full mb-4">
+        <div class="flex items-center space-x-1">
+          <a href=""><img src="LearnAssistLogo.png" alt="logo" width="40"></a>
+          <span class="text-xl font-bold text-indigo">LearnAssist</span>
+      </div>
+      <div class="flex space-x-1">
+          <a routerLink="/participant-registration" class="px-5 py-2 bg-blue-500 text-white rounded-md">Participant</a>
+          <a routerLink="/instructor-registration" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-md">Formateur</a>
+      </div>     
+      </div>
+        
+      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">
+            Inscription Participant
+      </h2>
+      <form class="grid grid-cols-2 gap-4" (ngSubmit)="onSubmit()" #registerForm="ngForm">
+        <div class="space-y-3">
+            <div>
+                <label for="firstName" class="block text-sm font-medium text-gray-700">Prénom</label>
+                <input type="text" id="firstName" name="firstName" required [(ngModel)]="participant.firstName" #firstName="ngModel" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="Votre prénom">
+                <div *ngIf="firstName.invalid && (firstName.dirty || firstName.touched)" class="error">
+                    Prénom est requis
+                </div>
+            </div>
+            <div>
+                <label for="lastName" class="block text-sm font-medium text-gray-700">Nom</label>
+                <input type="text" id="lastName" name="lastName" required [(ngModel)]="participant.lastName" #lastName="ngModel" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="Votre nom">
+                <div *ngIf="lastName.invalid && (lastName.dirty || lastName.touched)" class="error">
+                    Nom est requis
+                </div>
+            </div>
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Adresse Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
+                  [(ngModel)]="participant.email"
+                  #email="ngModel"
+                  class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="exemple@domaine.com"
+                />
+                <!-- Messages d'erreur -->
+                <div *ngIf="email.invalid && (email.dirty || email.touched)" class="text-red-500 text-sm mt-1">
+                  <p *ngIf="email.errors?.['required']">L'adresse email est requise.</p>
+                  <p *ngIf="email.errors?.['email']">Veuillez entrer une adresse email valide.</p>
+                  <p *ngIf="email.errors?.['pattern']">Le format de l'email est incorrect.</p>
+                </div>
+                <div *ngIf="errorMessage" class="text-red-500 text-sm mt-2 border border-red-500 bg-red-100 p-2 rounded-md"> 
+                  {{ errorMessage }}
+                </div>
+              </div>
+              
+              <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700">Téléphone Mobile</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  required
+                  [(ngModel)]="participant.phone"
+                  #phone="ngModel"
+                  pattern="^\+\d{1,3}\s\d{6,14}$"
+                  class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="+216 22222222"
+                />
+                <!-- Messages d'erreur -->
+                <div *ngIf="phone.invalid && (phone.dirty || phone.touched)" class="text-red-500 text-sm mt-1">
+                  <p *ngIf="phone.errors?.['required']">Le numéro de téléphone est requis.</p>
+                  <p *ngIf="phone.errors?.['pattern']">Veuillez entrer un numéro valide.</p>
+                </div>
+              </div>
+              
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  minlength="8"
+                  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
+                  [(ngModel)]="participant.password"
+                  #password="ngModel"
+                  required
+                  class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="******"
+                />
+                <!-- Message d'erreur pour le mot de passe -->
+                <div *ngIf="password.invalid && (password.dirty || password.touched)" class="text-red-500 text-sm mt-1">
+                  <p *ngIf="password.errors?.['required']">Le mot de passe est requis.</p>
+                  <p *ngIf="password.errors?.['minlength']">Le mot de passe doit contenir au moins 8 caractères.</p>
+                  <p *ngIf="password.errors?.['pattern']">
+                    Le mot de passe doit contenir une majuscule, une minuscule et un chiffre.
+                  </p>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Minimum 8 caractères, incluant majuscules, minuscules et chiffres.</p>
+              </div>
+              
+        </div>
+        <div class="space-y-3">
+            <div>
+                <label for="city" class="block text-sm font-medium text-gray-700">Ville</label>
+                <input type="text" id="city" name="city" required [(ngModel)]="participant.city" #city="ngModel" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="London, Paris, Tunis...">
+                <div *ngIf="city.invalid && (city.dirty || city.touched)" class="error">
+                    La ville est requise
+                </div>
+            </div>
+            <div>
+                <label for="educationLevel" class="block text-sm font-medium text-gray-700">Niveau d'éducation</label>
+                <input type="text" id="educationLevel" name="educationLevel" [(ngModel)]="participant.educationLevel" #educationLevel="ngModel" required  class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="Votre spécialité">
+                <div *ngIf="educationLevel.invalid && (educationLevel.dirty || educationLevel.touched)" class="error">
+                    Le Niveau d'éducation est requis
+                </div>
+            </div>
+            <div>
+                <label for="gender" class="block text-sm font-medium text-gray-700">Genre</label>
+                <select id="gender" name="gender" [(ngModel)]="participant.gender" #gender="ngModel" required class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="M" >Masculin</option>
+                    <option value="F">Féminin</option>
+                    <option value="O">Autre</option>
+                </select>
+            </div>
+            <div>
+                <label for="dateOfBirth" class="block text-sm font-medium text-gray-700">Date de naissance</label>
+                <input type="date" id="dateOfBirth" name="dateOfBirth" [(ngModel)]="participant.dateOfBirth" #dateOfBirth="ngModel" required class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  [(ngModel)]="participant.confirmPassword"
+                  #confirmPasswordInput="ngModel"
+                  [pattern]="participant.password"
+                  required
+                  class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="******"
+                />
+                <!-- Message d'erreur pour la confirmation du mot de passe -->
+                <div *ngIf="confirmPasswordInput.invalid && (confirmPasswordInput.dirty || confirmPasswordInput.touched)" class="text-red-500 text-sm mt-1">
+                  <p *ngIf="confirmPasswordInput.errors?.['required']">La confirmation est requise.</p>
+                  <p *ngIf="confirmPasswordInput.errors?.['pattern']">Les mots de passe ne correspondent pas.</p>
+                </div>
+              </div>
+        </div>
+        <div class="col-span-2 flex items-center justify-between mt-4">
+          <div class="flex items-center">
+            <input id="terms" type="checkbox" name="terms"  
+             required class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+            <label for="terms" class="ml-2 block text-sm text-gray-700">
+                J'accepte les conditions d'utilisation
+            </label>
+        </div>
+            <p class="text-sm">Déja inscrit? <a href="/login" class="text-blue-600 hover:text-blue-500">Connectez-vous</a></p>
+        </div>
+        <div class="col-span-2">
+            <button
+        type="submit" [disabled]="!registerForm.form.valid "
+        class="w-full flex justify-center py-3 px-4 border disabled:opacity-50 disabled:cursor-not-allowed
+         border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        S'inscrire
+      </button>
+        </div>
+    </form>
+    </div>
+  </div>  
