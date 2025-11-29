@@ -35,19 +35,13 @@ graph TD
 
 | Page d'accueil | Espace Participant |
 |:---:|:---:|
-|<img width="974" height="873" alt="Capture d&#39;écran 2025-11-29 105121" src="https://github.com/user-attachments/assets/8057ee02-cd90-4752-9ac0-13573014ada6" />
-  | <img width="1895" height="908" alt="image" src="https://github.com/user-attachments/assets/60ae5577-242c-4f63-a3eb-feca5d96c2a5" />
-|
+| <img src="https://github.com/user-attachments/assets/8057ee02-cd90-4752-9ac0-13573014ada6" alt="Page d'accueil" width="100%"> | <img src="https://github.com/user-attachments/assets/60ae5577-242c-4f63-a3eb-feca5d96c2a5" alt="Espace Participant" width="100%"> |
 | *Landing page moderne et accueillante* | *Suivi des cours et progression* |
 
 | Espace Instructeur | ChatBot IA |
 |:---:|:---:|
-| <img width="1253" height="907" alt="image" src="https://github.com/user-attachments/assets/cc623792-1e21-4431-817b-64bf7572b409" />
- | ![Uploading Capture d'écran 2025-11-29 105951.png…]()
- |
+| <img src="https://github.com/user-attachments/assets/cc623792-1e21-4431-817b-64bf7572b409" alt="Espace Instructeur" width="100%"> | <img src="LIEN_A_REMPLACER" alt="ChatBot IA" width="100%"> |
 | *Gestion des formations et statistiques* | *Assistance intelligente en temps réel* |
-
----
 
 ## 🚀 Fonctionnalités Principales
 
