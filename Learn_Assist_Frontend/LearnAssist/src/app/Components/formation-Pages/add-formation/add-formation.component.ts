@@ -29,7 +29,6 @@ export class AddFormationComponent {
     formationDuration: '',
     formationLevel: '',
     videoUrl: '',
-    emailInstructor:'',
     formationStatus:'draft'
   };
 
@@ -66,7 +65,7 @@ export class AddFormationComponent {
     const formData = new FormData();
     formData.append('image', this.image);
     formData.append('video', this.videoFile);
-    this.newFormation.emailInstructor=localStorage.getItem('userEmail') || '';
+    // The owner is determined by the backend from the JWT, never sent by the client.
     formData.append('formation', new Blob([JSON.stringify(this.newFormation)], { type: "application/json" }));
     this.formationService.addFormation(formData).subscribe({
       next: (response)=>{

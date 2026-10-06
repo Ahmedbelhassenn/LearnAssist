@@ -5,8 +5,11 @@ import com.example.LearnAssist.Models.Article;
 import com.example.LearnAssist.Repositories.ArticleRepository;
 import com.example.LearnAssist.Repositories.InstructorRepository;
 import com.example.LearnAssist.Services.ArticleServices;
+import com.example.LearnAssist.Services.FileStorageService;
+import com.example.LearnAssist.Storage.FileCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.security.Principal;
@@ -18,6 +21,8 @@ public class ArticleServicesImpl implements ArticleServices {
 
     @Autowired
     private ArticleRepository articleRepository;
+    @Autowired
+    private FileStorageService fileStorageService;
     @Autowired
     private InstructorRepository instructorRepository;
 
@@ -32,11 +37,18 @@ public class ArticleServicesImpl implements ArticleServices {
         return articleRepository.findAll();
     }
     @Override
-    public void addArticle(Article article) {
+    public void addArticle(Article article, MultipartFile image) {
         if (articleRepository.existsByTitle(article.getTitle())) {
             throw new ExceptionError("Article with this title already exists");
         }
-        articleRepository.save(article);
+        String imageFileName = fileStorageService.storeIfPresent(image, FileCategory.ARTICLE_IMAGE);
+        try {
+            article.setImageFileName(imageFileName);
+            articleRepository.save(article);
+        } catch (RuntimeException e) {
+            fileStorageService.delete(FileCategory.ARTICLE_IMAGE, imageFileName);
+            throw e;
+        }
     }
 
     @Override
@@ -53,7 +65,7 @@ public class ArticleServicesImpl implements ArticleServices {
     }
 
     @Override
-    public void editArticle(Long id, Article article, String email) {
+    public void editArticle(Long id, Article article, MultipartFile image, String email) {
         Article articleToEdit = articleRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("Article with not found")
         );
@@ -72,11 +84,21 @@ public class ArticleServicesImpl implements ArticleServices {
         if (article.getPublishedAt()!=null ){
             articleToEdit.setPublishedAt(article.getPublishedAt());
         }
-        if (article.getImageFileName() != null && !article.getImageFileName().isEmpty()){
-            articleToEdit.setImageFileName(article.getImageFileName());
+        // Ownership was checked above: only now is the new image written.
+        String previousImage = articleToEdit.getImageFileName();
+        String newImage = fileStorageService.storeIfPresent(image, FileCategory.ARTICLE_IMAGE);
+        try {
+            if (newImage != null) {
+                articleToEdit.setImageFileName(newImage);
+            }
+            articleRepository.save(articleToEdit);
+        } catch (RuntimeException e) {
+            fileStorageService.delete(FileCategory.ARTICLE_IMAGE, newImage);
+            throw e;
         }
-
-        articleRepository.save(articleToEdit);
+        if (newImage != null) {
+            fileStorageService.delete(FileCategory.ARTICLE_IMAGE, previousImage);
+        }
     }
 
     @Override
@@ -89,6 +111,7 @@ public class ArticleServicesImpl implements ArticleServices {
             throw new ExceptionError("You are not allowed to delete this Article");
         }
         articleRepository.deleteById(id);
+        fileStorageService.delete(FileCategory.ARTICLE_IMAGE, existingArticle.getImageFileName());
     }
 
 }

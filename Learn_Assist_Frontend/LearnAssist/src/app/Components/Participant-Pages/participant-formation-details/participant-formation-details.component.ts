@@ -1,6 +1,6 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { SafeUrlPipe } from '../../../safe-url.pipe';
+import { SafeEmbedUrlPipe } from '../../../safe-embed-url.pipe';
 import { FormationService } from '../../../services/formation/formation.service';
 import { Formation } from '../../../models/formation.model';
 import { ServiceService } from '../../../services/service.service';
@@ -19,7 +19,7 @@ interface Course {
 @Component({
   selector: 'app-participant-formation-details',
   standalone: true,
-  imports: [NgFor, SafeUrlPipe, FormsModule, NgIf],
+  imports: [NgFor, SafeEmbedUrlPipe, FormsModule, NgIf],
   templateUrl: './participant-formation-details.component.html',
   styleUrl: './participant-formation-details.component.css'
 })
@@ -88,7 +88,7 @@ export class ParticipantFormationDetailsComponent {
           this.fileService.getChapterVideo(this.formation.videoFileName).subscribe(
             (blob) => {
               const objectURL = URL.createObjectURL(blob);
-              this.formation.videoUrl = objectURL;
+              this.formation.videoBlobUrl = objectURL;
             },
             (error) => {
               console.error("Erreur lors du chargement du vidéo", error);

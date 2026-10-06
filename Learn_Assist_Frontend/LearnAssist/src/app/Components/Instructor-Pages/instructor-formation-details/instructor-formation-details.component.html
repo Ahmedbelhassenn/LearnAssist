@@ -21,13 +21,26 @@
           <!-- Vidéo -->
           <div class="w-full lg:w-2/3">
             <div class=" h-full bg-gray-100 rounded-xl overflow-hidden shadow">
-              <iframe
+              <!-- Video uploaded to the backend: played with <video>, never in an iframe -->
+              <video
+                *ngIf="formation.videoBlobUrl; else externalVideo"
                 class="w-full h-full"
-                [src]="formation.videoUrl | safeUrl"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              ></iframe>
+                [src]="formation.videoBlobUrl"
+                controls
+              ></video>
+              <!-- External video: only allow-listed HTTPS embeds (YouTube / Vimeo) -->
+              <ng-template #externalVideo>
+                <iframe
+                  *ngIf="formation.videoUrl | safeEmbedUrl as embedUrl"
+                  class="w-full h-full"
+                  [src]="embedUrl"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  sandbox="allow-scripts allow-same-origin allow-presentation"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  allowfullscreen
+                ></iframe>
+              </ng-template>
             </div>
           </div>
 

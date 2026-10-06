@@ -1,5 +1,6 @@
 package com.example.LearnAssist.Models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.Date;
@@ -32,6 +33,11 @@ public abstract class User {
 
     private String status;
 
+    /**
+     * Safety net: the hash can be read from a request body but is never written to JSON,
+     * even if an entity is accidentally returned by a controller.
+     */
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     private String password;
 

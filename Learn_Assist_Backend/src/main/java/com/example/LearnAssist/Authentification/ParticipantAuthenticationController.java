@@ -1,6 +1,7 @@
 package com.example.LearnAssist.Authentification;
 
 import com.example.LearnAssist.Configurations.ExceptionError;
+import com.example.LearnAssist.Dto.RegisterParticipantRequest;
 import com.example.LearnAssist.Jwt.JwtUtils;
 import com.example.LearnAssist.Models.Participant;
 import com.example.LearnAssist.Repositories.ParticipantRepository;
@@ -71,16 +72,20 @@ public class ParticipantAuthenticationController {
         LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken, id, photoName, gender);
         return ResponseEntity.ok(response);
     }
+    /**
+     * The body is bound to a DTO without id/role/status, so a client can never target or
+     * overwrite an existing account: a new participant is always created.
+     */
     @PostMapping("/register")
-    public ResponseEntity<?> registerParticipant(@Valid @RequestBody Participant participant) {
-        String password = participant.getPassword();
+    public ResponseEntity<?> registerParticipant(@Valid @RequestBody RegisterParticipantRequest request) {
+        Participant registeredParticipant;
         try {
-            Participant registeredParticipant = participantServices.addParticipant(participant);
+            registeredParticipant = participantServices.registerParticipant(request);
         }
         catch (ExceptionError e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-        LoginRequest loginRequest=new LoginRequest(participant.getEmail(), password);
+        LoginRequest loginRequest=new LoginRequest(registeredParticipant.getEmail(), request.getPassword());
         return authenticateUser(loginRequest);
     }
 

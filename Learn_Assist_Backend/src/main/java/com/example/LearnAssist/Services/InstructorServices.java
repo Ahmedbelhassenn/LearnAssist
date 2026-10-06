@@ -1,6 +1,7 @@
 package com.example.LearnAssist.Services;
 
 
+import com.example.LearnAssist.Dto.RegisterInstructorRequest;
 import com.example.LearnAssist.Models.Instructor;
 
 import java.security.Principal;
@@ -13,7 +14,7 @@ public interface InstructorServices {
     List<Instructor> getAllInstructors();
     void updateInstructor(Instructor instructor, Long id);
     void deleteInstructor(Long id);
-    Instructor addInstructor(Instructor instructor);
+    Instructor registerInstructor(RegisterInstructorRequest request);
     Map<String,String> getInstructorInformationById(Long id);
     Long getInstructorIdFromPrincipal(Principal principal);
     List<HashMap<String,String>> getInstructorsWithDetails();

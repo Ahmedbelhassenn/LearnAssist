@@ -4,7 +4,6 @@ import com.example.LearnAssist.Configurations.ExceptionError;
 import com.example.LearnAssist.Dto.CourseDto;
 import com.example.LearnAssist.Models.Course;
 import com.example.LearnAssist.Services.CourseServices;
-import com.example.LearnAssist.Services.FileServices;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -28,8 +28,6 @@ public class CourseController {
 
     @Autowired
     CourseServices courseServices;
-    @Autowired
-    FileServices fileServices;
 
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -65,32 +63,17 @@ public class CourseController {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             List<HashMap<String, String>> chapters = objectMapper.readValue(chaptersJson, new TypeReference<>() {});
-
-            for (int i = 0; i < chapters.size(); i++) {
-                HashMap<String, String> chapter = chapters.get(i);
-
-                MultipartFile video = files.get("chapterVideo" + i);
-                MultipartFile document = files.get("chapterDocument" + i);
-
-                if (video != null && !video.isEmpty()) {
-                    String videoFileName = fileServices.saveVideoFile(video);
-                    chapter.put("videoFileName", videoFileName);
-                }
-
-                if (document != null && !document.isEmpty()) {
-                    String documentFileName = fileServices.saveDocumentFile(document);
-                    chapter.put("documentFileName", documentFileName);
-                }
-            }
             String email = principal.getName();
-            courseServices.addCourse(idFormation, title, description, chapters, email);
+            // Chapter files ("chapterVideo{i}" / "chapterDocument{i}") are stored by the service
+            // only after the ownership check.
+            courseServices.addCourse(idFormation, title, description, chapters, files, email);
             response.put("message", "Course added successfully");
             return ResponseEntity.ok(response);
 
         } catch (ExceptionError e) {
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
-        } catch (IOException e) {
+        } catch (IOException | UncheckedIOException e) {
             response.put("message", "Error while parsing chapters data");
             return ResponseEntity.badRequest().body(response);
         }

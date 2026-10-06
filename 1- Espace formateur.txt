@@ -1,0 +1,17 @@
+1- Espace formateur: 
+	Compte privé:   - Profil
+		        - Création de formation
+		        - Création de Packs
+		        - Live session
+		        - Formation sur mesure: Donnez l'accès à un nombre spécifique d'étudiants pour demander une formation
+		        - Dashboard privé de gestion de revenue et des étudiants (pouvoir de modification à tout temps)
+			- Espace de contact (Messenger)
+			- Blogs
+2- Espace étudiant:
+	 Compte privé:
+			- Catalogue de Formations : Exploration et inscription aux cours disponibles.
+			- Suivi Pédagogique : Progression détaillée par chapitre et par cours.
+			- Assistant IA (ChatBot) : Support instantané basé sur l'IA pour répondre aux questions sur le contenu.
+			- Gestion de Profil : Personnalisation du profil et suivi des certifications.
+			- Messenger(formateur seulement)
+			- Accès Formations 

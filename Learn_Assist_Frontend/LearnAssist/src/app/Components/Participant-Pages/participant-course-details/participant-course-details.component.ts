@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
-import { SafeUrlPipe } from '../../../safe-url.pipe';
 import { ActivatedRoute } from '@angular/router';
 import { ChapterService } from '../../../services/chapter/chapter.service';
 import { CourseService } from '../../../services/course/course.service';
@@ -9,7 +8,7 @@ import { ServiceService } from '../../../services/service.service';
 @Component({
   selector: 'app-participant-course-details',
   standalone: true,
-  imports: [NgFor, NgIf, SafeUrlPipe],
+  imports: [NgFor, NgIf],
   templateUrl: './participant-course-details.component.html',
   styleUrl: './participant-course-details.component.css'
 })
@@ -40,7 +39,7 @@ export class ParticipantCourseDetailsComponent {
           this.fileService.getChapterVideo(chapter.videoFileName).subscribe(
             (blob) => {
               const objectURL = URL.createObjectURL(blob);
-              chapter.videoUrl = objectURL;
+              chapter.videoBlobUrl = objectURL;
             },
             (error) => {
               console.error("Erreur lors du chargement du vidéo", error);

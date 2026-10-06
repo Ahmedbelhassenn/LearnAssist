@@ -2,6 +2,7 @@ package com.example.LearnAssist.ServicesImplementations;
 
 
 import com.example.LearnAssist.Configurations.ExceptionError;
+import com.example.LearnAssist.Dto.RegisterInstructorRequest;
 import com.example.LearnAssist.Models.Instructor;
 import com.example.LearnAssist.Repositories.InstructorRepository;
 import com.example.LearnAssist.Repositories.ParticipantRepository;
@@ -26,6 +27,8 @@ public class InstructorServicesImpl implements InstructorServices {
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     ParticipantRepository participantRepository;
+    @Autowired
+    EmailAvailabilityChecker emailAvailabilityChecker;
 
     public Instructor getInstructorById(Long id){
         return instructorRepository.findById(id).orElseThrow(()-> new RuntimeException("Could not find instructor with id: " + id));
@@ -143,12 +146,26 @@ public class InstructorServicesImpl implements InstructorServices {
         instructorRepository.deleteById(id);
     }
 
-    public Instructor addInstructor(Instructor instructor) {
-        if(participantRepository.existsByEmail(instructor.getEmail())
-                || instructorRepository.existsByEmail(instructor.getEmail())){
+    /**
+     * Always creates a NEW instructor from the whitelisted DTO fields. The id is generated
+     * by the database, the role is forced and status/profile photo are never client-controlled.
+     */
+    public Instructor registerInstructor(RegisterInstructorRequest request) {
+        String email = request.getEmail().trim();
+        if(emailAvailabilityChecker.isTaken(email)){
             throw new ExceptionError("Email already registered!");
         }
-        instructor.setPassword(passwordEncoder.encode(instructor.getPassword()));
+        Instructor instructor = new Instructor();
+        instructor.setFirstName(request.getFirstName().trim());
+        instructor.setLastName(request.getLastName().trim());
+        instructor.setPhone(request.getPhone().trim());
+        instructor.setEmail(email);
+        instructor.setGender(request.getGender());
+        instructor.setDateOfBirth(request.getDateOfBirth());
+        instructor.setCity(request.getCity().trim());
+        instructor.setBio(request.getBio());
+        instructor.setSpeciality(request.getSpeciality());
+        instructor.setPassword(passwordEncoder.encode(request.getPassword()));
         instructor.setRole("INSTRUCTOR");
         return instructorRepository.save(instructor);
     }

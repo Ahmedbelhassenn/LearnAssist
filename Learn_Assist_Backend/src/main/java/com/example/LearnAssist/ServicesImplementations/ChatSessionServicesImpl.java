@@ -1,5 +1,6 @@
 package com.example.LearnAssist.ServicesImplementations;
 
+import com.example.LearnAssist.Exceptions.ResourceNotFoundException;
 import com.example.LearnAssist.Models.ChatMessage;
 import com.example.LearnAssist.Models.ChatSession;
 import com.example.LearnAssist.Models.GeminiResponse;
@@ -130,63 +131,36 @@ public class ChatSessionServicesImpl  implements ChatSessionServices {
     }
 
     @Override
-    public Optional<ChatSession> getSession(Long sessionId) {
-        return chatSessionRepository.findById(sessionId);
+    public void deleteSession(Long sessionId, String participantEmail) {
+        ChatSession session = findOwnedSession(sessionId, participantEmail);
+        chatSessionRepository.delete(session);
     }
 
     @Override
-    public List<ChatSession> getSessions() {
-        return chatSessionRepository.findAll();
+    public void editSessionTitle(Long sessionId, String newTitle, String participantEmail) {
+        ChatSession session = findOwnedSession(sessionId, participantEmail);
+        session.setTitle(newTitle);
+        chatSessionRepository.save(session);
     }
 
     @Override
-    public void deleteSession(Long sessionId, Long participantId) {
-        if (!chatSessionRepository.existsById(sessionId)) {
-            throw new RuntimeException("Session not found");
-        }
-        if(Objects.equals(chatSessionRepository.findById(sessionId).get().getParticipant().getId(), participantId)){
-            chatSessionRepository.deleteById(sessionId);
-        }
-        else{
-            throw new RuntimeException("Participant not found");
-        }
+    public List<ChatSession> getSessionsByParticipantEmail(String participantEmail) {
+        return chatSessionRepository.findByParticipantEmailOrderByCreatedAtDesc(participantEmail);
     }
 
     @Override
-    public void editSessionTitle(Long sessionId, String newTitle, Long userId) {
-
-        ChatSession session = chatSessionRepository.findById(sessionId).orElseThrow(
-                () -> new RuntimeException("Session not found")
-        );
-        if (Objects.equals(session.getParticipant().getId(), userId)) {
-            session.setTitle(newTitle);
-            chatSessionRepository.save(session);
-        }
-        else {
-            throw new RuntimeException("Participant not found");
-        }
-
-    }
-
-    @Override
-    public List<ChatSession> getSessionsByUserId(Long id){
-        List<ChatSession> chatSessions = new ArrayList<>();
-        for(ChatSession chatSession : chatSessionRepository.findAllByOrderByCreatedAtDesc()){
-            if(chatSession.getParticipant().getId().equals(id)){
-                chatSessions.add(chatSession);
-            }
-        }
-        return chatSessions;
-
-    }
-
-    @Override
-    public List<ChatMessage> getMessagesBySessionId(Long sessionId) {
-        ChatSession chatSession = chatSessionRepository.findById(sessionId)
-                .orElseThrow( () -> new RuntimeException("Session not found"));
-
+    public List<ChatMessage> getMessagesBySessionId(Long sessionId, String participantEmail) {
+        findOwnedSession(sessionId, participantEmail);
         return chatMessageRepository.findByChatSessionIdOrderByIdAsc(sessionId);
+    }
 
+    /**
+     * Loads a session only if it belongs to the given participant. A session of another
+     * participant is reported exactly like a missing one, so ids cannot be probed.
+     */
+    private ChatSession findOwnedSession(Long sessionId, String participantEmail) {
+        return chatSessionRepository.findByIdAndParticipantEmail(sessionId, participantEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
     }
 
 }

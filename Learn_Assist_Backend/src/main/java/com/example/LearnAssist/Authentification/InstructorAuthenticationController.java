@@ -1,6 +1,7 @@
 package com.example.LearnAssist.Authentification;
 
 import com.example.LearnAssist.Configurations.ExceptionError;
+import com.example.LearnAssist.Dto.RegisterInstructorRequest;
 import com.example.LearnAssist.Jwt.JwtUtils;
 import com.example.LearnAssist.Models.Instructor;
 import com.example.LearnAssist.Repositories.InstructorRepository;
@@ -71,17 +72,21 @@ public class InstructorAuthenticationController {
         LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken,id, photoName, gender);
         return ResponseEntity.ok(response);
     }
+    /**
+     * The body is bound to a DTO without id/role/status, so a client can never target or
+     * overwrite an existing account: a new instructor is always created.
+     */
     @PostMapping("/register")
-    public ResponseEntity<?> registerInstructor(@Valid @RequestBody Instructor instructor) {
-        String password = instructor.getPassword();
+    public ResponseEntity<?> registerInstructor(@Valid @RequestBody RegisterInstructorRequest request) {
+        Instructor registeredInstructor;
         try {
-            Instructor registeredParticipant = instructorServices.addInstructor(instructor);
+            registeredInstructor = instructorServices.registerInstructor(request);
         }
         catch (ExceptionError e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-        LoginRequest loginRequest= new LoginRequest(instructor.getEmail(),password);
-         return authenticateUser(loginRequest);
+        LoginRequest loginRequest= new LoginRequest(registeredInstructor.getEmail(), request.getPassword());
+        return authenticateUser(loginRequest);
     }
 
 }

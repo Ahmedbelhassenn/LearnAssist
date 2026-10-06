@@ -1,5 +1,6 @@
 package com.example.LearnAssist.ServicesImplementations;
 
+import com.example.LearnAssist.Exceptions.ResourceNotFoundException;
 import com.example.LearnAssist.Models.ChatMessage;
 import com.example.LearnAssist.Models.ChatSession;
 import com.example.LearnAssist.Models.GeminiResponse;
@@ -10,7 +11,6 @@ import com.example.LearnAssist.Repositories.ParticipantRepository;
 import com.example.LearnAssist.Services.ChatBotServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -41,12 +41,9 @@ public class ChatBotServicesImpl  implements ChatBotServices {
                 () -> new RuntimeException("User not found")
         );
 
-        ChatSession session = chatSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new RuntimeException("Session non trouvée"));
-
-        if (!session.getParticipant().getEmail().equals(userEmail)) {
-            throw new AccessDeniedException("Session non autorisée");
-        }
+        // Scoped lookup: a session of another participant is reported as not found.
+        ChatSession session = chatSessionRepository.findByIdAndParticipantEmail(sessionId, userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
 
         ChatMessage userMessage = new ChatMessage();
         userMessage.setRole("user");

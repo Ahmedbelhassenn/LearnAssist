@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
-import { SafeUrlPipe } from '../../../safe-url.pipe';
 import { CourseService } from '../../../services/course/course.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FilesService } from '../../../services/files/files.service';
@@ -12,7 +11,7 @@ import { EditChapterComponent } from '../../formation-Pages/edit-chapter/edit-ch
 @Component({
   selector: 'app-instructor-course-details',
   standalone: true,
-  imports: [NgFor, NgIf, SafeUrlPipe, AddChapterComponent, EditChapterComponent],
+  imports: [NgFor, NgIf, AddChapterComponent, EditChapterComponent],
   templateUrl: './instructor-course-details.component.html',
   styleUrl: './instructor-course-details.component.css'
 })
@@ -85,7 +84,7 @@ deleteChapter() {
           this.fileService.getChapterVideo(chapter.videoFileName).subscribe(
             (blob) => {
               const objectURL = URL.createObjectURL(blob);
-              chapter.videoUrl = objectURL;
+              chapter.videoBlobUrl = objectURL;
             },
             (error) => {
               console.error("Erreur lors du chargement du vidéo", error);

@@ -8,20 +8,27 @@ import com.example.LearnAssist.Repositories.ChapterRepository;
 import com.example.LearnAssist.Repositories.CourseRepository;
 import com.example.LearnAssist.Repositories.FormationRepository;
 import com.example.LearnAssist.Services.CourseServices;
+import com.example.LearnAssist.Services.FileStorageService;
 import com.example.LearnAssist.Services.InscriptionFormationServices;
+import com.example.LearnAssist.Storage.FileCategory;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CourseServicesImpl implements CourseServices {
     @Autowired
     private CourseRepository courseRepository;
+    @Autowired
+    private FileStorageService fileStorageService;
     @Autowired
     private ChapterRepository chapterRepository;
     @Autowired
@@ -54,7 +61,8 @@ public class CourseServicesImpl implements CourseServices {
     }
 
     @Override
-    public void addCourse(Long idFormation,String title, String description, List<HashMap<String, String>> chapters, String email) {
+    public void addCourse(Long idFormation, String title, String description, List<HashMap<String, String>> chapters,
+                          Map<String, MultipartFile> files, String email) {
         Formation formation = formationRepository.findById(idFormation)
                 .orElseThrow(() -> new ExceptionError("Formation not found"));
         String InstructorEmail=formation.getEmailInstructor();
@@ -84,15 +92,8 @@ public class CourseServicesImpl implements CourseServices {
                     newChapter.setDescription(chapterMap.get("description"));
                 }
 
-
-
-                if (chapterMap.get("documentFileName") != null && !chapterMap.get("documentFileName").isEmpty()) {
-                    newChapter.setDocumentFileName(chapterMap.get("documentFileName"));
-                }
-
-                if (chapterMap.get("videoFileName") != null && !chapterMap.get("videoFileName").isEmpty()) {
-                    newChapter.setVideoFileName(chapterMap.get("videoFileName"));
-                }
+                // File names are never taken from the client JSON ("videoFileName" /
+                // "documentFileName" keys are ignored): they only come from real uploads below.
 
                 if(chapterMap.get("quiz") != null && !chapterMap.get("quiz").isEmpty()) {
                     newChapter.setQuiz(chapterMap.get("quiz"));
@@ -105,8 +106,32 @@ public class CourseServicesImpl implements CourseServices {
             newCourse.setChapters(chapterList);
         }
 
-        // Ici, tout est sauvegardé grâce au cascade = ALL
-        courseRepository.save(newCourse);
+        // Ownership and titles are validated: the uploaded files can now be stored.
+        List<String[]> storedFiles = new ArrayList<>();
+        try {
+            for (int i = 0; i < chapterList.size(); i++) {
+                Chapter chapter = chapterList.get(i);
+                String video = fileStorageService.storeIfPresent(
+                        files == null ? null : files.get("chapterVideo" + i), FileCategory.VIDEO);
+                if (video != null) {
+                    storedFiles.add(new String[]{FileCategory.VIDEO.name(), video});
+                    chapter.setVideoFileName(video);
+                }
+                String document = fileStorageService.storeIfPresent(
+                        files == null ? null : files.get("chapterDocument" + i), FileCategory.DOCUMENT);
+                if (document != null) {
+                    storedFiles.add(new String[]{FileCategory.DOCUMENT.name(), document});
+                    chapter.setDocumentFileName(document);
+                }
+            }
+            // Ici, tout est sauvegardé grâce au cascade = ALL
+            courseRepository.save(newCourse);
+        } catch (RuntimeException e) {
+            for (String[] stored : storedFiles) {
+                fileStorageService.delete(FileCategory.valueOf(stored[0]), stored[1]);
+            }
+            throw e;
+        }
     }
 
 
@@ -133,6 +158,7 @@ public class CourseServicesImpl implements CourseServices {
     }
 
     @Override
+    @Transactional
     public void deleteCourse(Long id, String email) {
         Course existingCourse=courseRepository.findById(id).orElseThrow(
                 ()->  new  ExceptionError("Course not found")
@@ -140,6 +166,13 @@ public class CourseServicesImpl implements CourseServices {
         String InstructorEmail=existingCourse.getFormation().getEmailInstructor();
         if(!email.equals(InstructorEmail)) {
             throw new ExceptionError("You are not allowed to delete this course");
+        }
+        if (existingCourse.getChapters() != null) {
+            // Deferred until the transaction commits (see FileStorageService#delete).
+            for (Chapter chapter : existingCourse.getChapters()) {
+                fileStorageService.delete(FileCategory.VIDEO, chapter.getVideoFileName());
+                fileStorageService.delete(FileCategory.DOCUMENT, chapter.getDocumentFileName());
+            }
         }
         courseRepository.deleteById(id);
     }

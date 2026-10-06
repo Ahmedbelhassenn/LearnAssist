@@ -1,6 +1,7 @@
 package com.example.LearnAssist.Services;
 
 
+import com.example.LearnAssist.Dto.RegisterParticipantRequest;
 import com.example.LearnAssist.Models.Participant;
 
 import java.security.Principal;
@@ -11,7 +12,7 @@ public interface ParticipantServices {
     Participant getParticipantById(Long id);
     Map<String,String> getParticipantInformationById(Long id);
     List<Participant> getAllParticipants();
-    Participant addParticipant(Participant participant);
+    Participant registerParticipant(RegisterParticipantRequest request);
     void updateParticipant(Participant participant, Long id);
     void deleteParticipant(Long id);
     Long getParticipantIdFromPrincipal(Principal principal);

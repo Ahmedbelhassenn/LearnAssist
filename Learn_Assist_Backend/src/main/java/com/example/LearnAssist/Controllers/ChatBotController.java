@@ -1,6 +1,8 @@
 package com.example.LearnAssist.Controllers;
 
 import com.example.LearnAssist.Dto.ChatRequest;
+import com.example.LearnAssist.Exceptions.ResourceNotFoundException;
+import org.springframework.http.HttpStatus;
 import com.example.LearnAssist.Models.ChatMessage;
 import com.example.LearnAssist.Repositories.ChatMessageRepository;
 import com.example.LearnAssist.Services.ChatBotServices;
@@ -39,6 +41,9 @@ public class ChatBotController {
             map.put("response", response);
 
             return ResponseEntity.ok(map);
+        }catch (ResourceNotFoundException e){
+            map.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
         }catch (Exception e){
             map.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(map);

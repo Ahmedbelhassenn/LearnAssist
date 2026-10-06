@@ -6,7 +6,6 @@ import com.example.LearnAssist.Models.Article;
 import com.example.LearnAssist.Models.Instructor;
 import com.example.LearnAssist.Repositories.InstructorRepository;
 import com.example.LearnAssist.Services.ArticleServices;
-import com.example.LearnAssist.ServicesImplementations.ProfilePictureServicesImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +21,6 @@ import java.util.List;
 public class ArticleController {
     @Autowired
     ArticleServices articleServices;
-    @Autowired
-    ProfilePictureServicesImpl profilePictureServices;
     @Autowired
     InstructorRepository InstructorRepository;
     @Autowired
@@ -93,16 +90,13 @@ public class ArticleController {
             newArticle.setTitle(article.getTitle());
             newArticle.setContent(article.getContent());
             newArticle.setPublishedAt(article.getPublishedAt());
-            if (image != null && !image.isEmpty()) {
-                String imagePath = profilePictureServices.saveArticleImage(image);
-                newArticle.setImageFileName(imagePath);
-            }
             String email = principal.getName();
             Instructor instructor = instructorRepository.findByEmail(email).orElseThrow(
                     () -> new RuntimeException("instructor not found")
             );
             newArticle.setInstructor(instructor);
-            articleServices.addArticle(newArticle);
+            // The image is validated and stored by the service.
+            articleServices.addArticle(newArticle, image);
             response.put("message", "Article added successfully");
             return ResponseEntity.ok(response);
         }catch (Exception e) {
@@ -134,12 +128,9 @@ public class ArticleController {
             newArticle.setTitle(article.getTitle());
             newArticle.setContent(article.getContent());
             newArticle.setPublishedAt(article.getPublishedAt());
-            if (image != null && !image.isEmpty()) {
-                String imagePath = profilePictureServices.saveArticleImage(image);
-                newArticle.setImageFileName(imagePath);
-            }
             String email = principal.getName();
-            articleServices.editArticle(id, newArticle, email);
+            // The service checks ownership before storing the new image.
+            articleServices.editArticle(id, newArticle, image, email);
             response.put("message", "Article updated successfully");
             return ResponseEntity.ok(response);
 

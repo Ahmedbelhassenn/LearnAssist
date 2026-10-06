@@ -22,3 +22,9 @@ jwt:
 
 file:
   upload-dir: uploads/
+
+# Root folder of uploaded files (videos, documents, images). Sub-folders are created
+# automatically. Files are validated (extension, MIME type, signature, size) before storage.
+app:
+  upload:
+    base-dir: uploads

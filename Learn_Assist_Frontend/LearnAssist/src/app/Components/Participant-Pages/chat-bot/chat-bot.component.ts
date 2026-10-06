@@ -2,7 +2,7 @@ import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChatBotService } from '../../../services/chat-bot/chat-bot.service';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { MarkdownService } from '../../../services/markdown/markdown.service';
 import { ChatSessionService } from '../../../services/chat-sessions/chat-session.service';
 
 
@@ -17,10 +17,10 @@ interface Message{
   standalone: true,
   imports: [FormsModule, NgIf, NgFor, CommonModule],
   templateUrl: './chat-bot.component.html',
-  styleUrl: './chat-bot.component.scss'
+  styleUrl: './chat-bot.component.css'
 })
 export class ChatBotComponent implements AfterViewChecked {
-  constructor(private chatBotService: ChatBotService,  private sanitizer: DomSanitizer , private sessionService: ChatSessionService){}
+  constructor(private chatBotService: ChatBotService,  private markdown: MarkdownService , private sessionService: ChatSessionService){}
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   
   
@@ -149,46 +149,9 @@ export class ChatBotComponent implements AfterViewChecked {
   }
   
 
-  markdownToHtml(content: string): SafeHtml {
-    if (!content) return '';
-  
-    // D'abord traiter les blocs de code multiligne pour les neutraliser
-    let html = content.replace(/```[\s\S]*?```/g, match => {
-      // Enlever les backticks et garder seulement le contenu
-      const codeContent = match.replace(/```[\w]*\n?|\n```/g, '');
-      return `<pre class="bg-gray-100 p-3 rounded mb-4 overflow-x-auto text-sm"><code class="code-block">${codeContent}</code></pre>`;
-    });
-  
-    // Puis traiter les autres éléments Markdown
-    html = html
-      // Titres
-      .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold mb-2">$1</h3>')
-      .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold mb-3 mt-4">$1</h2>')
-      .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mb-4 mt-6">$1</h1>')
-  
-      // Code inline (simple mise en forme sans coloration)
-      .replace(/`([^`]+)`/g, '<code class="bg-gray-100 text-sm font-mono px-1 py-0.5 rounded">$1</code>')
-  
-      // Listes
-      .replace(/^\* (.*$)/gm, '<li class="list-disc ml-6">$1</li>')
-      .replace(/(<li[\s\S]*?<\/li>)/g, '<ul class="space-y-1 mb-2">$1</ul>')
-  
-      // Gras
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
-  
-      // Italique
-      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-  
-      // Liens
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-indigo-600 hover:underline" target="_blank" rel="noopener">$1</a>')
-  
-      // Paragraphes
-      .replace(/\n{2,}/g, '</p><p class="mb-4">')
-      .replace(/^(?!<h\d|<ul|<li|<p|<code|<strong|<em|<a|<\/?pre)(.+)$/gm, '<p class="mb-4">$1</p>');
-  
-    return this.sanitizer.bypassSecurityTrustHtml(
-      `<div class="prose prose-sm max-w-full break-words">${html}</div>`
-    );
+  /** Renders Markdown safely (marked + DOMPurify, no Angular sanitizer bypass). */
+  markdownToHtml(content: string): string {
+    return this.markdown.render(content);
   }
 
   

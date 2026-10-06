@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface InstructorRepository extends JpaRepository<Instructor, Long> {
     Optional<Instructor> findByEmail (String email);
     boolean existsByEmail (String email);
+    boolean existsByEmailIgnoreCase(String email);
 }

@@ -1,15 +1,24 @@
 package com.example.LearnAssist.ServicesImplementations;
 
 import com.example.LearnAssist.Configurations.ExceptionError;
+import com.example.LearnAssist.Dto.CreateFormationRequest;
+import com.example.LearnAssist.Dto.UpdateFormationRequest;
+import com.example.LearnAssist.Models.Chapter;
+import com.example.LearnAssist.Models.Course;
 import com.example.LearnAssist.Models.Formation;
 import com.example.LearnAssist.Models.Instructor;
 import com.example.LearnAssist.Repositories.FormationRepository;
 import com.example.LearnAssist.Repositories.InstructorRepository;
+import com.example.LearnAssist.Services.FileStorageService;
 import com.example.LearnAssist.Services.FormationServices;
+import com.example.LearnAssist.Storage.FileCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,84 +26,164 @@ import java.util.Objects;
 
 @Service
 public class FormationServicesImpl implements FormationServices {
+    static final String DRAFT_STATUS = "draft";
+
     @Autowired
     private FormationRepository formationRepository;
     @Autowired
     private InstructorRepository instructorRepository;
+    @Autowired
+    private FileStorageService fileStorageService;
 
     @Override
     public List<Formation> getAllFormations() {
         return formationRepository.findAll();
     }
 
+    /**
+     * Always creates a NEW formation: the id, owner, rate and status are decided here,
+     * never by the client (the DTO does not even carry them).
+     */
     @Override
-    public Long addFormation(Formation formation, String email) {
-        if (formationRepository.existsByTitle(formation.getTitle())) {
-            throw new ExceptionError("Formation with this title already exists");
-        }
-        if(!formation.getEmailInstructor().equals(email)) {
+    public Long addFormation(CreateFormationRequest request, MultipartFile image, MultipartFile video, String email) {
+        if (!instructorRepository.existsByEmail(email)) {
             throw new ExceptionError("Vous n'avez pas le droit d'ajouter cette formation");
         }
-        formationRepository.save(formation);
-        return formationRepository.findByTitle(formation.getTitle()).getId();
+        if (formationRepository.existsByTitle(request.getTitle())) {
+            throw new ExceptionError("Formation with this title already exists");
+        }
+        Formation formation = new Formation();
+        formation.setTitle(request.getTitle());
+        formation.setDescription(request.getDescription());
+        formation.setVideoUrl(blankToNull(request.getVideoUrl()));
+        formation.setFormationCategory(request.getFormationCategory());
+        formation.setFormationLanguage(request.getFormationLanguage());
+        formation.setPrice(request.getPrice());
+        formation.setFormationDuration(request.getFormationDuration());
+        formation.setFormationLevel(request.getFormationLevel());
+        formation.setCertification(request.getCertification());
+        formation.setFormationCreationDate(LocalDate.now().toString());
+        formation.setFormationStatus(DRAFT_STATUS);
+        formation.setEmailInstructor(email);
+
+        List<String[]> storedFiles = new ArrayList<>();
+        try {
+            formation.setImageFileName(storeTracked(image, FileCategory.FORMATION_IMAGE, storedFiles));
+            formation.setVideoFileName(storeTracked(video, FileCategory.VIDEO, storedFiles));
+            return formationRepository.save(formation).getId();
+        } catch (RuntimeException e) {
+            deleteTracked(storedFiles);
+            throw e;
+        }
     }
 
     @Override
-    public void updateFormation(Long id, Formation formation, String email ) {
-            Formation existingFormation=formationRepository.findById(id).orElseThrow(
-                    () -> new RuntimeException("Formation not found")
-            );
-            if (!existingFormation.getEmailInstructor().equals(email)){
-                throw new ExceptionError("Vous n'avez pas le droit de modifier cette formation");
-            }
-            if(!formation.getTitle().equals(existingFormation.getTitle())) {
-                if(formationRepository.existsByTitle(formation.getTitle())) {
-                    throw new ExceptionError("Formation with this title already exists");
-                }
-            }
-            existingFormation.setTitle(formation.getTitle());
-            if(formation.getDescription()!=null){
-                existingFormation.setDescription(formation.getDescription());
-            }
-            if(formation.getFormationStatus()!=null){
-                existingFormation.setFormationStatus(formation.getFormationStatus());
-            }
-            if(formation.getFormationCategory()!=null){
-                existingFormation.setFormationCategory(formation.getFormationCategory());
-            }
-            if(formation.getFormationLanguage()!=null){
-                existingFormation.setFormationLanguage(formation.getFormationLanguage());
-            }
-            if(formation.getFormationDuration()!=null){
-                existingFormation.setFormationDuration(formation.getFormationDuration());
-            }
-            if(formation.getCertification()!=null){
-                existingFormation.setCertification(formation.getCertification());
-            }
+    public void updateFormation(Long id, UpdateFormationRequest request, MultipartFile image, MultipartFile video, String email) {
+        Formation existingFormation = formationRepository.findById(id).orElseThrow(
+                () -> new ExceptionError("Formation not found")
+        );
+        // Ownership is checked BEFORE any file is written.
+        if (!email.equals(existingFormation.getEmailInstructor())) {
+            throw new ExceptionError("Vous n'avez pas le droit de modifier cette formation");
+        }
+        if (!request.getTitle().equals(existingFormation.getTitle())
+                && formationRepository.existsByTitle(request.getTitle())) {
+            throw new ExceptionError("Formation with this title already exists");
+        }
+        existingFormation.setTitle(request.getTitle());
+        if (request.getDescription() != null) {
+            existingFormation.setDescription(request.getDescription());
+        }
+        if (request.getFormationCategory() != null) {
+            existingFormation.setFormationCategory(request.getFormationCategory());
+        }
+        if (request.getFormationLanguage() != null) {
+            existingFormation.setFormationLanguage(request.getFormationLanguage());
+        }
+        if (request.getFormationDuration() != null) {
+            existingFormation.setFormationDuration(request.getFormationDuration());
+        }
+        if (request.getFormationLevel() != null) {
+            existingFormation.setFormationLevel(request.getFormationLevel());
+        }
+        if (request.getCertification() != null) {
+            existingFormation.setCertification(request.getCertification());
+        }
+        if (request.getPrice() != null) {
+            existingFormation.setPrice(request.getPrice());
+        }
+        if (request.getVideoUrl() != null) {
+            existingFormation.setVideoUrl(blankToNull(request.getVideoUrl()));
+        }
 
-            if(formation.getPrice()!=null){
-                existingFormation.setPrice(formation.getPrice());
+        String previousImage = existingFormation.getImageFileName();
+        String previousVideo = existingFormation.getVideoFileName();
+        List<String[]> storedFiles = new ArrayList<>();
+        try {
+            String newImage = storeTracked(image, FileCategory.FORMATION_IMAGE, storedFiles);
+            String newVideo = storeTracked(video, FileCategory.VIDEO, storedFiles);
+            if (newImage != null) {
+                existingFormation.setImageFileName(newImage);
             }
-            if(formation.getVideoUrl()!=null){
-                existingFormation.setVideoUrl(formation.getVideoUrl());
-            }
-            if(formation.getImageFileName()!=null){
-                existingFormation.setImageFileName(formation.getImageFileName());
-            }
-            if(formation.getVideoFileName()!=null){
-                existingFormation.setVideoFileName(formation.getVideoFileName());
+            if (newVideo != null) {
+                existingFormation.setVideoFileName(newVideo);
             }
             formationRepository.save(existingFormation);
+            // Old files are only removed once the new ones are referenced in the database.
+            if (newImage != null) {
+                fileStorageService.delete(FileCategory.FORMATION_IMAGE, previousImage);
+            }
+            if (newVideo != null) {
+                fileStorageService.delete(FileCategory.VIDEO, previousVideo);
+            }
+        } catch (RuntimeException e) {
+            deleteTracked(storedFiles);
+            throw e;
+        }
     }
 
     @Override
+    @Transactional
     public void deleteFormation(Long id, String email) {
-        if (!formationRepository.existsById(id)) {
-            throw new ExceptionError("Formation with id " + id + " not found");
-        } else if (!formationRepository.getReferenceById(id).getEmailInstructor().equals(email)) {
-            throw  new ExceptionError("Vous n'avez pas le droit de supprimer cette formation");
+        Formation formation = formationRepository.findById(id).orElseThrow(
+                () -> new ExceptionError("Formation with id " + id + " not found"));
+        if (!email.equals(formation.getEmailInstructor())) {
+            throw new ExceptionError("Vous n'avez pas le droit de supprimer cette formation");
         }
-        formationRepository.deleteById(id);
+        // Collect every file of the formation (courses and chapters are deleted by cascade).
+        fileStorageService.delete(FileCategory.FORMATION_IMAGE, formation.getImageFileName());
+        fileStorageService.delete(FileCategory.VIDEO, formation.getVideoFileName());
+        if (formation.getCourses() != null) {
+            for (Course course : formation.getCourses()) {
+                if (course.getChapters() == null) {
+                    continue;
+                }
+                for (Chapter chapter : course.getChapters()) {
+                    fileStorageService.delete(FileCategory.VIDEO, chapter.getVideoFileName());
+                    fileStorageService.delete(FileCategory.DOCUMENT, chapter.getDocumentFileName());
+                }
+            }
+        }
+        // Inside the transaction, the file deletions above only run after a successful commit.
+        formationRepository.delete(formation);
+    }
+
+    private String storeTracked(MultipartFile file, FileCategory category, List<String[]> storedFiles) {
+        String fileName = fileStorageService.storeIfPresent(file, category);
+        if (fileName != null) {
+            storedFiles.add(new String[]{category.name(), fileName});
+        }
+        return fileName;
+    }
+
+    private void deleteTracked(List<String[]> storedFiles) {
+        for (String[] stored : storedFiles) {
+            fileStorageService.delete(FileCategory.valueOf(stored[0]), stored[1]);
+        }
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 
     @Override

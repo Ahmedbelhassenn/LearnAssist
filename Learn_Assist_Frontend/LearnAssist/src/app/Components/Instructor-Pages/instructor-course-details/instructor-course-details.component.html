@@ -105,15 +105,9 @@
                 <!-- Contenu des onglets -->
                 <div class="pt-4">
                   <!-- Vidéo -->
-                  <div *ngIf="chapter?.videoUrl" class="mb-2">
+                  <div *ngIf="chapter?.videoBlobUrl" class="mb-2">
                     <div class=" h-64 bg-gray-100 rounded-lg overflow-hidden shadow">
-                      <iframe
-                        class="w-full h-full"
-                        [src]="chapter?.videoUrl | safeUrl"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen
-                      ></iframe>
+                      <video class="w-full h-full" [src]="chapter.videoBlobUrl" controls></video>
                     </div>
                   </div>
               

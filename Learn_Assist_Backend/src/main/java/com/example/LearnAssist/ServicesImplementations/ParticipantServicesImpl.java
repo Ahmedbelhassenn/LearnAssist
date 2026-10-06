@@ -2,6 +2,7 @@ package com.example.LearnAssist.ServicesImplementations;
 
 
 import com.example.LearnAssist.Configurations.ExceptionError;
+import com.example.LearnAssist.Dto.RegisterParticipantRequest;
 import com.example.LearnAssist.Models.Participant;
 import com.example.LearnAssist.Repositories.InstructorRepository;
 import com.example.LearnAssist.Repositories.ParticipantRepository;
@@ -24,6 +25,8 @@ public class ParticipantServicesImpl implements ParticipantServices {
     InstructorRepository instructorRepository;
     @Autowired
     PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
+    @Autowired
+    EmailAvailabilityChecker emailAvailabilityChecker;
 
     public Participant getParticipantById(Long id){
         return participantRepository.findById(id).orElseThrow(()-> new RuntimeException("Participant not found"));
@@ -50,12 +53,25 @@ public class ParticipantServicesImpl implements ParticipantServices {
         return participantRepository.findAll();
     }
 
-    public Participant addParticipant(Participant participant){
-        if(participantRepository.existsByEmail(participant.getEmail())
-                || instructorRepository.existsByEmail(participant.getEmail())){
+    /**
+     * Always creates a NEW participant from the whitelisted DTO fields. The id is generated
+     * by the database, the role is forced and status/profile photo are never client-controlled.
+     */
+    public Participant registerParticipant(RegisterParticipantRequest request){
+        String email = request.getEmail().trim();
+        if(emailAvailabilityChecker.isTaken(email)){
             throw new ExceptionError("Email already registered!");
         }
-        participant.setPassword(passwordEncoder.encode(participant.getPassword()));
+        Participant participant = new Participant();
+        participant.setFirstName(request.getFirstName().trim());
+        participant.setLastName(request.getLastName().trim());
+        participant.setPhone(request.getPhone().trim());
+        participant.setEmail(email);
+        participant.setGender(request.getGender());
+        participant.setDateOfBirth(request.getDateOfBirth());
+        participant.setCity(request.getCity().trim());
+        participant.setEducationLevel(request.getEducationLevel());
+        participant.setPassword(passwordEncoder.encode(request.getPassword()));
         participant.setRole("PARTICIPANT");
         return participantRepository.save(participant);
     }

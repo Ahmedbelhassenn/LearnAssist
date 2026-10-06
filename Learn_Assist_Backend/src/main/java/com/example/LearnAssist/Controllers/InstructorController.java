@@ -1,6 +1,7 @@
 package com.example.LearnAssist.Controllers;
 
 
+import com.example.LearnAssist.Dto.InstructorResponse;
 import com.example.LearnAssist.Models.Instructor;
 import com.example.LearnAssist.Services.InstructorServices;
 
@@ -25,14 +26,14 @@ public class InstructorController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
-    public Instructor getInstructorById(@PathVariable Long id){
-        return instructorServices.getInstructorById(id);
+    public InstructorResponse getInstructorById(@PathVariable Long id){
+        return InstructorResponse.from(instructorServices.getInstructorById(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all")
-    public List<Instructor> getAllInstructors(){
-        return instructorServices.getAllInstructors();
+    public List<InstructorResponse> getAllInstructors(){
+        return instructorServices.getAllInstructors().stream().map(InstructorResponse::from).toList();
     }
 
 

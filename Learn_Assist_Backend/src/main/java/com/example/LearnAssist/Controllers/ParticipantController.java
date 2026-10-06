@@ -1,5 +1,6 @@
 package com.example.LearnAssist.Controllers;
 
+import com.example.LearnAssist.Dto.ParticipantResponse;
 import com.example.LearnAssist.Models.Participant;
 import com.example.LearnAssist.Services.ParticipantServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +25,14 @@ public class ParticipantController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all")
-    public List<Participant> getAllParticipants() {
-        return participantServices.getAllParticipants();
+    public List<ParticipantResponse> getAllParticipants() {
+        return participantServices.getAllParticipants().stream().map(ParticipantResponse::from).toList();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
-    public Participant getParticipantById(@PathVariable Long id) {
-        return participantServices.getParticipantById(id);
+    public ParticipantResponse getParticipantById(@PathVariable Long id) {
+        return ParticipantResponse.from(participantServices.getParticipantById(id));
     }
 
     @PreAuthorize("hasAnyRole('PARTICIPANT','ADMIN')")

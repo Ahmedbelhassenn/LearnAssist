@@ -3,32 +3,25 @@ package com.example.LearnAssist.Controllers;
 
 
 import com.example.LearnAssist.Configurations.ExceptionError;
+import com.example.LearnAssist.Dto.CreateFormationRequest;
+import com.example.LearnAssist.Dto.UpdateFormationRequest;
 import com.example.LearnAssist.Models.Formation;
-import com.example.LearnAssist.Services.FileServices;
 import com.example.LearnAssist.Services.FormationServices;
-import com.example.LearnAssist.ServicesImplementations.ProfilePictureServicesImpl;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/formations")
 public class FormationController {
     @Autowired
     FormationServices formationServices;
-
-    @Autowired
-    ProfilePictureServicesImpl profilePictureServices;
-
-    @Autowired
-    FileServices fileServices;
 
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -54,12 +47,13 @@ public class FormationController {
 
     @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @PutMapping("update/{id}")
-    public ResponseEntity<?> updateFormation(Principal principal, @PathVariable Long id, @RequestBody Formation formation) {
+    public ResponseEntity<?> updateFormation(Principal principal, @PathVariable Long id,
+                                             @Valid @RequestBody UpdateFormationRequest formation) {
         HashMap<String,String> response = new HashMap<>();
         try{
             String email = principal.getName();
 
-            formationServices.updateFormation(id, formation, email);
+            formationServices.updateFormation(id, formation, null, null, email);
             response.put("message", "Formation updated");
             return ResponseEntity.ok(response);
         }catch (Exception e) {
@@ -87,19 +81,18 @@ public class FormationController {
 
     @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @PostMapping
-    public ResponseEntity<?> addFormation(Principal principal, @RequestPart Formation formation, @RequestParam Map<String, MultipartFile> files) {
+    public ResponseEntity<?> addFormation(Principal principal,
+                                          @Valid @RequestPart("formation") CreateFormationRequest formation,
+                                          @RequestPart(value = "image", required = false) MultipartFile image,
+                                          @RequestPart(value = "video", required = false) MultipartFile video) {
         HashMap<String,String> response = new HashMap<>();
         try {
-            String imageName = profilePictureServices.saveImage(files.get("image"));
-            formation.setImageFileName(imageName);
-            String videoFileName = fileServices.saveVideoFile(files.get("video"));
-            formation.setVideoFileName(videoFileName);
-            String email= principal.getName();
-            Long id= formationServices.addFormation(formation,email);
+            // The owner is always the authenticated instructor.
+            Long id = formationServices.addFormation(formation, image, video, principal.getName());
             response.put("message", "Formation added successfully");
             response.put("id", String.valueOf(id));
             return ResponseEntity.ok(response);
-        }catch (ExceptionError | IOException e) {
+        }catch (ExceptionError e) {
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
@@ -107,25 +100,17 @@ public class FormationController {
 
     @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> editFormation(Principal principal, @RequestPart Formation formation, @RequestParam Map<String, MultipartFile> files,
+    public ResponseEntity<?> editFormation(Principal principal,
+                                           @Valid @RequestPart("formation") UpdateFormationRequest formation,
+                                           @RequestPart(value = "image", required = false) MultipartFile image,
+                                           @RequestPart(value = "video", required = false) MultipartFile video,
                                            @PathVariable Long id) {
         HashMap<String,String> response = new HashMap<>();
         try {
-            MultipartFile image=files.get("image");
-            if(image != null && !image.isEmpty()) {
-                String fileName = profilePictureServices.saveImage(files.get("image"));
-                formation.setImageFileName(fileName);
-            }
-            MultipartFile video=files.get("video");
-            if(video != null && !video.isEmpty()) {
-                String fileName = fileServices.saveVideoFile(files.get("video"));
-                formation.setVideoFileName(fileName);
-            }
-            String email = principal.getName();
-            formationServices.updateFormation(id, formation, email);
+            formationServices.updateFormation(id, formation, image, video, principal.getName());
             response.put("message", "Formation updated successfully");
             return ResponseEntity.ok(response);
-        }catch (ExceptionError | IOException e) {
+        }catch (ExceptionError e) {
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }

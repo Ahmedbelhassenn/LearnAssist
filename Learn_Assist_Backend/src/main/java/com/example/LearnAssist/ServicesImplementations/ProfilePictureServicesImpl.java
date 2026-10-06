@@ -1,21 +1,18 @@
 package com.example.LearnAssist.ServicesImplementations;
 
-
-import com.example.LearnAssist.Configurations.ExceptionError;
+import com.example.LearnAssist.Exceptions.ResourceNotFoundException;
 import com.example.LearnAssist.Models.Instructor;
 import com.example.LearnAssist.Models.Participant;
 import com.example.LearnAssist.Repositories.InstructorRepository;
 import com.example.LearnAssist.Repositories.ParticipantRepository;
+import com.example.LearnAssist.Services.FileStorageService;
+import com.example.LearnAssist.Storage.FileCategory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
-import java.util.UUID;
 
 @Service
 public class ProfilePictureServicesImpl {
@@ -23,63 +20,43 @@ public class ProfilePictureServicesImpl {
     ParticipantRepository participantRepository;
     @Autowired
     InstructorRepository instructorRepository;
-    private static final String UPLOAD_DIR = "uploads/profile-pictures/";
-    private static final String UPLOAD_PIC = "uploads/courses-pictures/";
-    private static final String UPLOAD_Article = "uploads/article-pictures/";
-    public String saveImage(MultipartFile file) throws IOException {
-        // Vérifier si le dossier existe, sinon le créer
-        File uploadDir = new File(UPLOAD_PIC);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
-        }
-        // Générer un nom unique pour éviter les conflits
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path filePath = Paths.get(UPLOAD_PIC, fileName);
-        // Sauvegarder le fichier sur le serveur
-        Files.write(filePath, file.getBytes());
+    @Autowired
+    FileStorageService fileStorageService;
 
-        return fileName;
-    }
-    public String saveArticleImage(MultipartFile file) throws IOException {
-        File uploadDir = new File(UPLOAD_Article);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
-        }
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path filePath = Paths.get(UPLOAD_Article, fileName);
-        Files.write(filePath, file.getBytes());
-        return fileName;
-    }
-
-    public String saveProfilePicture(MultipartFile file) throws IOException {
-        // Vérifier si le dossier existe, sinon le créer
-        File uploadDir = new File(UPLOAD_DIR);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
-        }
-        // Générer un nom unique pour éviter les conflits
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path filePath = Paths.get(UPLOAD_DIR, fileName);
-        // Sauvegarder le fichier sur le serveur
-        Files.write(filePath, file.getBytes());
-
-        return fileName;
-    }
-    public void saveProfilePictureName(String photoName, Long id, String role) throws IOException {
-        if(Objects.equals(role, "ROLE_INSTRUCTOR")) {
-            Instructor instructor = instructorRepository.findById(id).orElseThrow(
-                    () -> new ExceptionError("Instructor Not Found")
-            );
-            instructor.setProfilePhoto(photoName);
+    /**
+     * Replaces the profile picture of the authenticated user. The account type is taken
+     * from the authentication, never from the request. The user is resolved BEFORE the
+     * file is written, and the previous picture is deleted once the new one is saved.
+     */
+    @Transactional
+    public String updateProfilePicture(Authentication authentication, MultipartFile file) {
+        String email = authentication.getName();
+        if (hasRole(authentication, "ROLE_INSTRUCTOR")) {
+            Instructor instructor = instructorRepository.findByEmail(email).orElseThrow(
+                    () -> new ResourceNotFoundException("Instructor not found"));
+            String fileName = fileStorageService.store(file, FileCategory.PROFILE_PICTURE);
+            String previous = instructor.getProfilePhoto();
+            instructor.setProfilePhoto(fileName);
             instructorRepository.save(instructor);
+            fileStorageService.delete(FileCategory.PROFILE_PICTURE, previous);
+            return fileName;
         }
-        else if(Objects.equals(role, "ROLE_PARTICIPANT")) {
-            Participant participant=participantRepository.findById(id).orElseThrow(
-                    () -> new ExceptionError("Participant not found")
-            );
-            participant.setProfilePhoto(photoName);
+        if (hasRole(authentication, "ROLE_PARTICIPANT")) {
+            Participant participant = participantRepository.findByEmail(email).orElseThrow(
+                    () -> new ResourceNotFoundException("Participant not found"));
+            String fileName = fileStorageService.store(file, FileCategory.PROFILE_PICTURE);
+            String previous = participant.getProfilePhoto();
+            participant.setProfilePhoto(fileName);
             participantRepository.save(participant);
+            fileStorageService.delete(FileCategory.PROFILE_PICTURE, previous);
+            return fileName;
         }
+        throw new ResourceNotFoundException("User not found");
+    }
 
+    private static boolean hasRole(Authentication authentication, String role) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role::equals);
     }
 }
